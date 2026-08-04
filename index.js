@@ -505,8 +505,8 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
       const ONE44_CHECKOUT = 'https://one44.base44.app/checkout';
       const tierInfo = {
         builder: { name: 'Builder', price: '$15/mo', desc: 'Compiler + proposals + email templates. Full /sly suite, 500 cmds/mo, 3 bots.' },
-        studio: { name: 'Studio', price: '$49/mo', desc: 'Everything + Kive product visuals. Unlimited bots, commands, multiple servers.' },
-        bespoke: { name: 'Bespoke', price: '$149/mo', desc: 'White-glove: custom Kive studios, branded deliverables, custom Discord server setup, priority processing.' },
+        studio: { name: 'Studio', price: '$49/mo', desc: 'Everything + AI product visuals. Unlimited bots, commands, multiple servers.' },
+        bespoke: { name: 'Bespoke', price: '$149/mo', desc: 'White-glove: custom AI studios, branded deliverables, custom Discord server setup, priority processing.' },
       };
       if (tier && tierInfo[tier]) {
         const ti = tierInfo[tier];
@@ -520,7 +520,7 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
       return res.json(E({ title: '💎 ONE/44 OS — Pricing', desc: 'Your build, compiled — from idea to launch. Payment processed at ONE/44.', color: C.brand, thumb: true, fields: [
         f('Free', '$0 · Compiler + community · 1 bot · 50 cmds/mo'),
         f('Builder', '$15/mo · Proposals + emails · 500 cmds · 3 bots'),
-        f('Studio', '$49/mo · + Kive visuals · ∞ bots · ∞ cmds'),
+        f('Studio', '$49/mo · + AI visuals · ∞ bots · ∞ cmds'),
         f('Bespoke', '$149/mo · White-glove · Custom everything'),
         sp(),
         tip('Example: `/sly upgrade builder` → checkout at ONE/44'),
