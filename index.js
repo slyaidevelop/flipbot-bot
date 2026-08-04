@@ -12,13 +12,14 @@ const BOT_API_URL = process.env.BOT_API_URL || 'https://vesper-fe683526.base44.a
 const BOT_API_SECRET = process.env.BOT_API_SECRET || 'flipbot-bot-api-2026';
 const PROV_URL = 'https://vesper-fe683526.base44.app/functions/provisionTemplateServer';
 const CK_URL = 'https://vesper-fe683526.base44.app/functions/createCheckoutSession';
+const ONE44_URL = 'https://one44.base44.app/functions';
 const PORT = process.env.PORT || 3000;
 
 const ROLE_MEMBER = '1532596411395215493';
 const ROLE_BUILDER = '1532834237491970151';
 const ROLE_SHIPPED = '1532596421470191829';
 
-const FOOTER = 'FlipBot by SLY • Flip your app into a bot.';
+const FOOTER = 'ONE/44 OS · Powered by FlipBot';
 const LOGO = 'https://media.base44.com/images/public/6a6c0faeaea192b5fe683526/6cb74b688_FlipBot-by-SLY-App-Cover.png';
 const C = { brand: 0x7C5CFC, success: 0x4ADE80, warn: 0xF59E0B, error: 0xEF4444, info: 0x3B82F6, dark: 0x1A1A2E };
 
@@ -346,11 +347,13 @@ function healthEmbed(lat) {
   ]});
 }
 function commandsEmbed() {
-  return E({ title: '🤖 /sly Commands', desc: '8 AI-powered subcommands:', color: C.brand, thumb: true, fields: [
-    f('/sly build', 'Idea → architecture', false), f('/sly rescue', 'Diagnose broken builds', false),
-    f('/sly audit', 'Review an app URL', false), f('/sly docs', 'Answer from docs', false),
-    f('/sly prompt', '🔥 Elite one-shot prompt', false), f('/sly ship', 'Showcase project', false),
-    f('/sly request', 'Browse modules', false), f('/sly upgrade', 'View pricing', false),
+  return E({ title: '🤖 ONE/44 OS — Command Suite', desc: '12 commands for the full build pipeline:', color: C.brand, thumb: true, fields: [
+    f('/sly prompt', '🔥 Compile architecture', false), f('/sly propose', '📄 Generate proposal', false),
+    f('/sly emails', '📧 Create email templates', false), f('/sly visuals', '📸 Product visuals (Kive)', false),
+    f('/sly launch', '🚀 Full launch pipeline', false), f('/sly build', '🏗️ AI build analysis', false),
+    f('/sly rescue', '🔧 Debug broken builds', false), f('/sly audit', '🔍 Review app URL', false),
+    f('/sly docs', '📚 Search Base44 docs', false), f('/sly ship', '🚢 Showcase project', false),
+    f('/sly request', '🧩 Browse modules', false), f('/sly upgrade', '💎 View pricing', false),
     sp(), tip('All responses are private.')
   ]});
 }
@@ -363,7 +366,7 @@ function guideEmbed() {
   ]});
 }
 function startResponse() {
-  return { type: 4, data: { embeds: [embed("⚡ FlipBot — Let's Get Started", "## The Base44 Builder Copilot for Discord\n**🎉 Free Beta — All features unlocked.**\n\nThree paths: **server only**, **bot only**, or **both**.", C.brand, [f('🚀 Create','Server, bot, or both',false), f('📖 Guide','Step-by-step walkthrough',false), f('🔒 Security','How credentials are handled',false), f('🤖 Commands','Preview the /sly suite',false), sp()], true)], components: [{ type: 1, components: [
+  return { type: 4, data: { embeds: [embed("⚡ ONE/44 OS — Let's Get Started", "## The Base44 Builder Copilot for Discord\n**🎉 Free Beta — All features unlocked.**\n\nYour build, compiled — from idea to launch. Architecture, proposals, emails, and product visuals in one pipeline.", C.brand, [f('🚀 Create','Server, bot, or both',false), f('📖 Guide','Step-by-step walkthrough',false), f('🔒 Security','How credentials are handled',false), f('🤖 Commands','Preview the /sly suite',false), sp()], true)], components: [{ type: 1, components: [
     { type: 2, custom_id: 'start_create', label: '🚀 Create', style: 3 },
     { type: 2, custom_id: 'start_guide', label: '📖 Guide', style: 1 },
     { type: 2, custom_id: 'start_security', label: '🔒 Security', style: 1 },
@@ -427,6 +430,48 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
         textRow('visual', 'Visual direction', 1, false, 'precise, command, institution, lux, creative, warm, technical (default: precise)'),
         textRow('mode', 'Build mode', 1, false, 'quick, guided, challenge (default: challenge)'),
         textRow('features', 'Specific features or constraints? (optional)', 2, false, 'Must-haves, exclusions'),
+      ]));
+    }
+
+    // /sly propose → proposal modal
+    if (cn === 'sly' && sub === 'propose') {
+      return res.json(modal('propose_modal', '📄 Generate Proposal', [
+        textRow('idea', 'What are you building?', 2, true, 'Describe the app or project'),
+        textRow('client_name', 'Client name (optional)', 1, false, 'Who is this proposal for?'),
+        textRow('budget', 'Budget range (optional)', 1, false, 'e.g. $5k-$15k'),
+        textRow('timeline', 'Timeline (optional)', 1, false, 'e.g. 4 weeks'),
+        textRow('notes', 'Additional notes (optional)', 2, false, 'Special requirements, constraints'),
+      ]));
+    }
+
+    // /sly emails → email template modal
+    if (cn === 'sly' && sub === 'emails') {
+      return res.json(modal('emails_modal', '📧 Generate Email Templates', [
+        textRow('app_name', 'App name', 1, true, 'Your product name'),
+        textRow('design_style', 'Design style (optional)', 1, false, 'precise, command, lux, creative, warm, technical'),
+        textRow('primary_color', 'Primary color (optional)', 1, false, 'Hex, e.g. #7C5CFC'),
+        textRow('email_types', 'Email types (optional)', 1, false, 'launch, onboarding, newsletter (default: all)'),
+      ]));
+    }
+
+    // /sly visuals → Kive product visual modal
+    if (cn === 'sly' && sub === 'visuals') {
+      return res.json(modal('visuals_modal', '📸 Generate Product Visuals', [
+        textRow('product_url', 'Product URL or image URL', 1, true, 'https://...'),
+        textRow('studio', 'Studio style (optional)', 1, false, 'e.g. Soho Streetstyle, Cobalt Studio'),
+        textRow('prompt', 'Describe the shot (optional)', 2, false, 'e.g. "street campaign, golden hour"'),
+        textRow('asset_type', 'Asset type (optional)', 1, false, 'image or video (default: image)'),
+      ]));
+    }
+
+    // /sly launch → full pipeline modal
+    if (cn === 'sly' && sub === 'launch') {
+      return res.json(modal('launch_modal', '🚀 Full Launch Pipeline', [
+        textRow('idea', 'What are you building?', 2, true, 'Describe your app idea'),
+        textRow('type', 'App type (optional)', 1, false, 'ops, cust, ai, edu, mkt, com, crt (default: ops)'),
+        textRow('visual', 'Visual direction (optional)', 1, false, 'precise, command, lux, creative, warm, technical'),
+        textRow('mode', 'Build mode (optional)', 1, false, 'quick, guided, challenge (default: challenge)'),
+        textRow('features', 'Features or constraints (optional)', 2, false, 'Must-haves, exclusions'),
       ]));
     }
 
@@ -723,6 +768,62 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
       } catch (ex) { return res.json(E({ title: '⚠️ Error', desc: String(ex).substring(0, 200), color: C.error })); }
     }
 
+    // Propose modal → deferred + BotCommand
+    if (mid === 'propose_modal') {
+      const idea = san(fv.get('idea') || '', 4000);
+      if (!idea) return res.json(eph('Please describe what you want to build.'));
+      res.json({ type: 5, data: { flags: 64 } });
+      db('create', 'BotCommand', {
+        command_type: 'propose', request_text: idea, user_id: uid, guild_id: gid,
+        channel_id: i.channel_id || '', interaction_token: i.token || '',
+        application_id: APP_ID, status: 'pending', result: '', result_posted: false
+      }).catch(e => console.error('BotCommand create failed:', e));
+      db('create', 'BotInteraction', { interaction_id: i.id, command_name: 'sly-propose', user_id: uid, guild_id: gid, is_ai_command: true, outcome: 'processing', latency_ms: Date.now() - t0, error_category: null }).catch(() => {});
+      return;
+    }
+
+    // Emails modal → deferred + BotCommand
+    if (mid === 'emails_modal') {
+      const appName = san(fv.get('app_name') || '', 200);
+      if (!appName) return res.json(eph('Please provide an app name.'));
+      res.json({ type: 5, data: { flags: 64 } });
+      db('create', 'BotCommand', {
+        command_type: 'emails', request_text: appName, user_id: uid, guild_id: gid,
+        channel_id: i.channel_id || '', interaction_token: i.token || '',
+        application_id: APP_ID, status: 'pending', result: '', result_posted: false
+      }).catch(e => console.error('BotCommand create failed:', e));
+      db('create', 'BotInteraction', { interaction_id: i.id, command_name: 'sly-emails', user_id: uid, guild_id: gid, is_ai_command: true, outcome: 'processing', latency_ms: Date.now() - t0, error_category: null }).catch(() => {});
+      return;
+    }
+
+    // Visuals modal → deferred + BotCommand (Kive)
+    if (mid === 'visuals_modal') {
+      const productUrl = san(fv.get('product_url') || '', 500);
+      if (!productUrl) return res.json(eph('Please provide a product URL.'));
+      res.json({ type: 5, data: { flags: 64 } });
+      db('create', 'BotCommand', {
+        command_type: 'visuals', request_text: productUrl, user_id: uid, guild_id: gid,
+        channel_id: i.channel_id || '', interaction_token: i.token || '',
+        application_id: APP_ID, status: 'pending', result: '', result_posted: false
+      }).catch(e => console.error('BotCommand create failed:', e));
+      db('create', 'BotInteraction', { interaction_id: i.id, command_name: 'sly-visuals', user_id: uid, guild_id: gid, is_ai_command: true, outcome: 'processing', latency_ms: Date.now() - t0, error_category: null }).catch(() => {});
+      return;
+    }
+
+    // Launch modal → full pipeline (compile + propose + emails + visuals)
+    if (mid === 'launch_modal') {
+      const idea = san(fv.get('idea') || '', 4000);
+      if (!idea) return res.json(eph('Please describe what you want to build.'));
+      res.json({ type: 5, data: { flags: 64 } });
+      db('create', 'BotCommand', {
+        command_type: 'launch', request_text: idea, user_id: uid, guild_id: gid,
+        channel_id: i.channel_id || '', interaction_token: i.token || '',
+        application_id: APP_ID, status: 'pending', result: '', result_posted: false
+      }).catch(e => console.error('BotCommand create failed:', e));
+      db('create', 'BotInteraction', { interaction_id: i.id, command_name: 'sly-launch', user_id: uid, guild_id: gid, is_ai_command: true, outcome: 'processing', latency_ms: Date.now() - t0, error_category: null }).catch(() => {});
+      return;
+    }
+
     // Ship modal
     if (mid.startsWith('ship_modal_')) {
       try {
@@ -748,4 +849,48 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
 app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime(), timestamp: new Date().toISOString() }));
 app.get('/', (req, res) => res.json({ name: 'FlipBot by SLY', status: 'running' }));
 
-app.listen(PORT, () => console.log(`🔥 FlipBot running on port ${PORT}`));
+// === COMMAND REGISTRATION ===
+async function registerCommands() {
+  if (!BT) { console.log('⚠️ No bot token, skipping command registration'); return; }
+  const url = `https://discord.com/api/v10/applications/${APP_ID}/commands`;
+  const commands = [
+    {
+      name: 'sly',
+      description: 'ONE/44 OS — Build suite',
+      options: [
+        { name: 'prompt', description: '🔥 Compile architecture prompt', type: 1 },
+        { name: 'propose', description: '📄 Generate client proposal', type: 1 },
+        { name: 'emails', description: '📧 Create branded email templates', type: 1 },
+        { name: 'visuals', description: '📸 Generate product visuals (Kive)', type: 1 },
+        { name: 'launch', description: '🚀 Full launch pipeline', type: 1 },
+        { name: 'build', description: '🏗️ AI build analysis', type: 1, options: [{ name: 'goal', description: 'What to build', type: 3, required: true }] },
+        { name: 'rescue', description: '🔧 Debug broken builds', type: 1, options: [{ name: 'problem', description: 'What is broken', type: 3, required: true }] },
+        { name: 'audit', description: '🔍 Review an app URL', type: 1, options: [{ name: 'url', description: 'App URL to audit', type: 3, required: true }] },
+        { name: 'docs', description: '📚 Search Base44 docs', type: 1, options: [{ name: 'query', description: 'Search query', type: 3, required: true }] },
+        { name: 'ship', description: '🚢 Showcase your project', type: 1 },
+        { name: 'request', description: '🧩 Browse add-on modules', type: 1 },
+        { name: 'upgrade', description: '💎 View pricing', type: 1, options: [{ name: 'tier', description: 'pro, studio, template, bespoke', type: 3 }] },
+      ]
+    },
+    { name: 'start', description: '⚡ Get started with ONE/44 OS' },
+    { name: 'bot-create', description: '🤖 Create a bot or server' },
+    { name: 'bot-status', description: '🤖 Check your bots' },
+    { name: 'pulse', description: '📡 Live platform activity' },
+    { name: 'ticket', description: '🎫 Create support ticket', options: [
+      { name: 'subject', description: 'Ticket subject', type: 3, required: true },
+      { name: 'type', description: 'support, bug, feature', type: 3, required: true },
+      { name: 'description', description: 'Describe the issue', type: 3, required: true }
+    ]},
+    { name: 'health', description: '🤖 Bot health check' },
+  ];
+  try {
+    const res = await fetch(url, { method: 'PUT', headers: { Authorization: `Bot ${BT}`, 'Content-Type': 'application/json' }, body: JSON.stringify(commands) });
+    if (res.ok) console.log('✅ Commands registered (' + commands.length + ' top-level)');
+    else console.error('Command registration failed:', res.status, await res.text());
+  } catch (e) { console.error('Command registration failed:', e); }
+}
+
+app.listen(PORT, async () => {
+  console.log(`🔥 ONE/44 OS running on port ${PORT}`);
+  await registerCommands();
+});
