@@ -237,7 +237,13 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
         try {
           const ckRes = await fetch(CK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tier, discord_user_id: uid }) });
           const ck = await ckRes.json();
-          if (ck.checkout_url) return res.json(E({ title: '💎 Upgrade to ' + tier.charAt(0).toUpperCase() + tier.slice(1), desc: 'Click to complete upgrade.', color: C.brand, thumb: true, fields: [{ name: '🔗 Checkout', value: ck.checkout_url, inline: false }, tip('Instant activation.')] }));
+          if (ck.checkout_url) {
+            const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
+            return res.json(E({ title: '💎 Upgrade to ' + tierName, desc: 'Click to complete upgrade.', color: C.brand, thumb: true, fields: [
+              { name: '🔗 Checkout', value: ck.checkout_url, inline: false },
+              tip('Instant activation.')
+            ] }));
+          }
           return res.json(E({ title: '⚠️ Error', desc: ck.error || 'Could not create checkout.', color: C.error }));
         } catch { return res.json(E({ title: '⚠️ Error', desc: 'Could not create checkout link.', color: C.error })); }
       }
