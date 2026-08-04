@@ -861,7 +861,7 @@ app.get('/', (req, res) => res.json({ name: 'FlipBot by SLY', status: 'running' 
 // === COMMAND REGISTRATION ===
 async function registerCommands() {
   if (!BT) { console.log('⚠️ No bot token, skipping command registration'); return; }
-  const url = `https://discord.com/api/v10/applications/${APP_ID}/commands`;
+  const url = `https://discord.com/api/v10/applications/${APP_ID}/guilds/${GUILD_ID}/commands`;
   const commands = [
     {
       name: 'sly',
