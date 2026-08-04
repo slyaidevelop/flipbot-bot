@@ -538,21 +538,21 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
     // Wizard: select app type
     if (cid === 'prompt_t') {
       const type = i.data.values?.[0] || 'ops';
-      return res.json({ type: 6, data: { embeds: [stepEmbed(2, 4, "What's the visual direction?", 'Choose the aesthetic personality. This defines the design system.', [`Type: ${TN[type] || type}`])], components: [selRow(`prompt_v|${type}`, 'Select a visual style...', VISUALS)] } });
+      return res.json({ type: 6, data: { flags: 64, embeds: [stepEmbed(2, 4, "What's the visual direction?", 'Choose the aesthetic personality. This defines the design system.', [`Type: ${TN[type] || type}`])], components: [selRow(`prompt_v|${type}`, 'Select a visual style...', VISUALS)] } });
     }
 
     // Wizard: select visual
     if (cid.startsWith('prompt_v|')) {
       const [_, type] = cid.split('|');
       const visual = i.data.values?.[0] || 'precise';
-      return res.json({ type: 6, data: { embeds: [stepEmbed(3, 4, "What's your build mode?", 'How ambitious is this build?', [`Type: ${TN[type] || type}`, `Visual: ${VN[visual] || visual}`])], components: [selRow(`prompt_m|${type}|${visual}`, 'Select a build mode...', MODES)] } });
+      return res.json({ type: 6, data: { flags: 64, embeds: [stepEmbed(3, 4, "What's your build mode?", 'How ambitious is this build?', [`Type: ${TN[type] || type}`, `Visual: ${VN[visual] || visual}`])], components: [selRow(`prompt_m|${type}|${visual}`, 'Select a build mode...', MODES)] } });
     }
 
     // Wizard: select mode
     if (cid.startsWith('prompt_m|')) {
       const [_, type, visual] = cid.split('|');
       const mode = i.data.values?.[0] || 'challenge';
-      return res.json({ type: 6, data: { embeds: [stepEmbed(4, 4, 'Ready to compile!', 'Click the button below and describe your app idea.\n\nThe output includes:\n• Complete entity architecture\n• Page definitions & routes\n• Functional workflows\n• Design system (colors, fonts, spacing)\n• Seed data\n• Acceptance criteria\n• Implementation contract\n• Ready-to-paste Base44 prompt', [`Type: ${TN[type] || type}`, `Visual: ${VN[visual] || visual}`, `Mode: ${MN[mode] || mode}`])], components: [btnRow(`prompt_btn|${type}|${visual}|${mode}`, '📝 Describe My App Idea', 3)] } });
+      return res.json({ type: 6, data: { flags: 64, embeds: [stepEmbed(4, 4, 'Ready to compile!', 'Click the button below and describe your app idea.\n\nThe output includes:\n• Complete entity architecture\n• Page definitions & routes\n• Functional workflows\n• Design system (colors, fonts, spacing)\n• Seed data\n• Acceptance criteria\n• Implementation contract\n• Ready-to-paste Base44 prompt', [`Type: ${TN[type] || type}`, `Visual: ${VN[visual] || visual}`, `Mode: ${MN[mode] || mode}`])], components: [btnRow(`prompt_btn|${type}|${visual}|${mode}`, '📝 Describe My App Idea', 3)] } });
     }
 
     // Wizard: button → modal
