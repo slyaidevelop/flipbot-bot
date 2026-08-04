@@ -21,6 +21,7 @@ const ROLE_SHIPPED = '1532596421470191829';
 
 const FOOTER = 'ONE/44 OS · Powered by FlipBot';
 const LOGO = 'https://media.base44.com/images/public/6a6c0faeaea192b5fe683526/6cb74b688_FlipBot-by-SLY-App-Cover.png';
+const COBRAND_BANNER = 'https://media.base44.com/images/public/6a6c0faeaea192b5fe683526/38ef78e42_image.png';
 const C = { brand: 0x7C5CFC, success: 0x4ADE80, warn: 0xF59E0B, error: 0xEF4444, info: 0x3B82F6, dark: 0x1A1A2E };
 
 // === HELPERS ===
@@ -31,8 +32,8 @@ function verifySig(body, sig, ts, key) {
 
 function san(s, max = 2000) { return (s || '').substring(0, max).replace(/[`@#<>]/g, ''); }
 
-function embed(title, desc, color, fields, thumb) {
-  return { title, description: desc, color: color ?? C.brand, fields: fields || [], footer: { text: FOOTER }, timestamp: new Date().toISOString(), ...(thumb ? { thumbnail: { url: LOGO } } : {}) };
+function embed(title, desc, color, fields, thumb, banner) {
+  return { title, description: desc, color: color ?? C.brand, fields: fields || [], footer: { text: FOOTER }, timestamp: new Date().toISOString(), ...(thumb ? { thumbnail: { url: LOGO } } : {}), ...(banner ? { image: { url: COBRAND_BANNER } } : {}) };
 }
 
 function E(o) {
@@ -498,24 +499,32 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
       textRow('project_category', 'Category', 1, false, 'SaaS, Tools...'),
     ]));
 
-    // /sly upgrade
+    // /sly upgrade — routes to ONE/44 checkout
     if (cn === 'sly' && sub === 'upgrade') {
       const tier = san(opts.get('tier') || '', 20).toLowerCase().trim();
-      if (tier && ['pro', 'studio', 'template', 'bespoke'].includes(tier)) {
-        try {
-          const ckRes = await fetch(CK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tier, discord_user_id: uid }) });
-          const ck = await ckRes.json();
-          if (ck.checkout_url) {
-            const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
-            return res.json(E({ title: '💎 Upgrade to ' + tierName, desc: 'Click to complete upgrade.', color: C.brand, thumb: true, fields: [
-              { name: '🔗 Checkout', value: ck.checkout_url, inline: false },
-              tip('Instant activation.')
-            ] }));
-          }
-          return res.json(E({ title: '⚠️ Error', desc: ck.error || 'Could not create checkout.', color: C.error }));
-        } catch { return res.json(E({ title: '⚠️ Error', desc: 'Could not create checkout link.', color: C.error })); }
+      const ONE44_CHECKOUT = 'https://one44.base44.app/checkout';
+      const tierInfo = {
+        builder: { name: 'Builder', price: '$15/mo', desc: 'Compiler + proposals + email templates. Full /sly suite, 500 cmds/mo, 3 bots.' },
+        studio: { name: 'Studio', price: '$49/mo', desc: 'Everything + Kive product visuals. Unlimited bots, commands, multiple servers.' },
+        bespoke: { name: 'Bespoke', price: '$149/mo', desc: 'White-glove: custom Kive studios, branded deliverables, custom Discord server setup, priority processing.' },
+      };
+      if (tier && tierInfo[tier]) {
+        const ti = tierInfo[tier];
+        const checkoutUrl = ONE44_CHECKOUT + '?tier=' + tier + '&discord=' + uid;
+        return res.json(E({ title: '💎 Upgrade to ' + ti.name, desc: ti.desc, color: C.brand, thumb: true, fields: [
+          f('Price', ti.price), f('Tier', ti.name), sp(),
+          { name: '🔗 Complete checkout at ONE/44', value: checkoutUrl, inline: false },
+          tip('Payment processed by ONE/44. Bot access updates automatically after checkout.'),
+        ]}));
       }
-      return res.json(E({ title: '💎 Pricing', desc: 'Run `/sly upgrade <tier>` for a link.', color: C.brand, thumb: true, fields: [f('Free', '$0 · 1 bot · 50 cmds/mo'), f('Pro', '$12/mo · 3 bots · 500 cmds'), f('Studio', '$39/mo · ∞ bots · ∞ cmds'), f('Template', '$49/mo · Full server + bot'), f('Bespoke', '$99/mo · Custom design'), sp(), tip('Example: /sly upgrade pro')] }));
+      return res.json(E({ title: '💎 ONE/44 OS — Pricing', desc: 'Your build, compiled — from idea to launch. Payment processed at ONE/44.', color: C.brand, thumb: true, fields: [
+        f('Free', '$0 · Compiler + community · 1 bot · 50 cmds/mo'),
+        f('Builder', '$15/mo · Proposals + emails · 500 cmds · 3 bots'),
+        f('Studio', '$49/mo · + Kive visuals · ∞ bots · ∞ cmds'),
+        f('Bespoke', '$149/mo · White-glove · Custom everything'),
+        sp(),
+        tip('Example: `/sly upgrade builder` → checkout at ONE/44'),
+      ]}));
     }
 
     // /sly build, rescue, audit, docs → create BotCommand, return "processing"
@@ -869,7 +878,7 @@ async function registerCommands() {
         { name: 'docs', description: '📚 Search Base44 docs', type: 1, options: [{ name: 'query', description: 'Search query', type: 3, required: true }] },
         { name: 'ship', description: '🚢 Showcase your project', type: 1 },
         { name: 'request', description: '🧩 Browse add-on modules', type: 1 },
-        { name: 'upgrade', description: '💎 View pricing', type: 1, options: [{ name: 'tier', description: 'pro, studio, template, bespoke', type: 3 }] },
+        { name: 'upgrade', description: '💎 View pricing', type: 1, options: [{ name: 'tier', description: 'builder, studio, bespoke', type: 3 }] },
       ]
     },
     { name: 'start', description: '⚡ Get started with ONE/44 OS' },
