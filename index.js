@@ -419,9 +419,15 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
     const sub = i.data?.options?.[0]?.name || '';
     const opts = getOptions(i.data?.options?.[0]?.options);
 
-    // /sly prompt → wizard
+    // /sly prompt → modal (no wizard, no dropdowns — just works)
     if (cn === 'sly' && sub === 'prompt') {
-      return res.json({ type: 4, data: { flags: 64, embeds: [stepEmbed(1, 4, 'What type of app are you building?', 'Pick the category that best fits your idea. This shapes the entire architecture.')], components: [selRow('prompt_t', 'Select an app type...', TYPES)] } });
+      return res.json(modal('prompt_modal', '🔥 ONE/44 Prompt Compiler', [
+        textRow('idea', 'What are you building?', 2, true, 'A task tracker for small teams'),
+        textRow('type', 'App type', 1, false, 'ops, cust, ai, edu, mkt, com, crt (default: ops)'),
+        textRow('visual', 'Visual direction', 1, false, 'precise, command, institution, lux, creative, warm, technical (default: precise)'),
+        textRow('mode', 'Build mode', 1, false, 'quick, guided, challenge (default: challenge)'),
+        textRow('features', 'Specific features or constraints? (optional)', 2, false, 'Must-haves, exclusions'),
+      ]));
     }
 
     // /start
@@ -535,32 +541,7 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
   if (i.type === 3) {
     const cid = i.data?.custom_id || '';
 
-    // Wizard: select app type
-    if (cid === 'prompt_t') {
-      const type = i.data.values?.[0] || 'ops';
-      return res.json({ type: 6, data: { flags: 64, embeds: [stepEmbed(2, 4, "What's the visual direction?", 'Choose the aesthetic personality. This defines the design system.', [`Type: ${TN[type] || type}`])], components: [selRow(`prompt_v|${type}`, 'Select a visual style...', VISUALS)] } });
-    }
-
-    // Wizard: select visual
-    if (cid.startsWith('prompt_v|')) {
-      const [_, type] = cid.split('|');
-      const visual = i.data.values?.[0] || 'precise';
-      return res.json({ type: 6, data: { flags: 64, embeds: [stepEmbed(3, 4, "What's your build mode?", 'How ambitious is this build?', [`Type: ${TN[type] || type}`, `Visual: ${VN[visual] || visual}`])], components: [selRow(`prompt_m|${type}|${visual}`, 'Select a build mode...', MODES)] } });
-    }
-
-    // Wizard: select mode
-    if (cid.startsWith('prompt_m|')) {
-      const [_, type, visual] = cid.split('|');
-      const mode = i.data.values?.[0] || 'challenge';
-      return res.json({ type: 6, data: { flags: 64, embeds: [stepEmbed(4, 4, 'Ready to compile!', 'Click the button below and describe your app idea.\n\nThe output includes:\n• Complete entity architecture\n• Page definitions & routes\n• Functional workflows\n• Design system (colors, fonts, spacing)\n• Seed data\n• Acceptance criteria\n• Implementation contract\n• Ready-to-paste Base44 prompt', [`Type: ${TN[type] || type}`, `Visual: ${VN[visual] || visual}`, `Mode: ${MN[mode] || mode}`])], components: [btnRow(`prompt_btn|${type}|${visual}|${mode}`, '📝 Describe My App Idea', 3)] } });
-    }
-
-    // Wizard: button → modal
-    if (cid.startsWith('prompt_btn|')) {
-      const [_, type, visual, mode] = cid.split('|');
-      return res.json(promptFinalModal(type, visual, mode));
-    }
-
+    // (Wizard removed — using direct modal instead)
     // Start buttons
     if (cid === 'start_create') return res.json(botCreateModal(uid));
     if (cid === 'start_security') return res.json(securityEmbed());
@@ -595,12 +576,18 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
     const fv = new Map();
     for (const row of comps) for (const c of (row.components || [])) if (c.value) fv.set(c.custom_id, c.value);
 
-    // Prompt final → ONE/44 gateway compilation (instant, real compiler)
-    if (mid.startsWith('prompt_final|')) {
-      const [_, type, visual, mode] = mid.split('|');
+    // Prompt modal → ONE/44 gateway compilation
+    if (mid === 'prompt_modal') {
       const idea = san(fv.get('idea') || '', 4000);
+      let type = (fv.get('type') || 'ops').toLowerCase().trim();
+      let visual = (fv.get('visual') || 'precise').toLowerCase().trim();
+      let mode = (fv.get('mode') || 'challenge').toLowerCase().trim();
       const features = san(fv.get('features') || '', 1000);
       if (!idea) return res.json(eph('Please describe what you want to build.'));
+      // Validate and apply defaults
+      if (!['ops', 'cust', 'ai', 'edu', 'mkt', 'com', 'crt'].includes(type)) type = 'ops';
+      if (!['precise', 'command', 'institution', 'lux', 'creative', 'warm', 'technical'].includes(visual)) visual = 'precise';
+      if (!['quick', 'guided', 'challenge'].includes(mode)) mode = 'challenge';
 
       // Generate a semi-detailed brief from the user's inputs
       const typeName = TN[type] || type;
