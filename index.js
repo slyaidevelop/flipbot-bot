@@ -76,27 +76,27 @@ async function db(action, entity, data, id) {
 
 // === WIZARD DATA ===
 const TYPES = [
-  { label: 'Internal Operations Tool', value: 'ops', description: 'Dashboards, admin panels, workflow systems', emoji: '⚙️' },
-  { label: 'Customer Portal', value: 'cust', description: 'Client access, account management, support', emoji: '🏪' },
-  { label: 'AI Product', value: 'ai', description: 'AI-powered tools, generators, analyzers', emoji: '🤖' },
-  { label: 'Education Platform', value: 'edu', description: 'Courses, LMS, training, assessment', emoji: '📚' },
-  { label: 'Marketplace', value: 'mkt', description: 'Listings, transactions, vendor profiles', emoji: '🛒' },
-  { label: 'Community Hub', value: 'com', description: 'Forums, events, profiles, moderation', emoji: '👥' },
-  { label: 'Creative Experience', value: 'crt', description: 'Portfolios, galleries, generators', emoji: '🎨' },
+  { label: 'Internal Operations Tool', value: 'ops', description: 'Dashboards, admin panels, workflow systems', emoji: { name: '⚙️' } },
+  { label: 'Customer Portal', value: 'cust', description: 'Client access, account management, support', emoji: { name: '🏪' } },
+  { label: 'AI Product', value: 'ai', description: 'AI-powered tools, generators, analyzers', emoji: { name: '🤖' } },
+  { label: 'Education Platform', value: 'edu', description: 'Courses, LMS, training, assessment', emoji: { name: '📚' } },
+  { label: 'Marketplace', value: 'mkt', description: 'Listings, transactions, vendor profiles', emoji: { name: '🛒' } },
+  { label: 'Community Hub', value: 'com', description: 'Forums, events, profiles, moderation', emoji: { name: '👥' } },
+  { label: 'Creative Experience', value: 'crt', description: 'Portfolios, galleries, generators', emoji: { name: '🎨' } },
 ];
 const VISUALS = [
-  { label: 'Precision Editorial', value: 'precise', description: 'Clean, typographic, content-first', emoji: '✒️' },
-  { label: 'Operational Command Center', value: 'command', description: 'Dark, dense, data-driven', emoji: '🎛️' },
-  { label: 'Institutional Intelligence', value: 'institution', description: 'Professional, structured, trustworthy', emoji: '🏛️' },
-  { label: 'Luxury Minimal', value: 'lux', description: 'Spacious, elegant, premium', emoji: '✨' },
-  { label: 'Creative Technology', value: 'creative', description: 'Bold, experimental, modern', emoji: '🌈' },
-  { label: 'Warm & Human', value: 'warm', description: 'Friendly, approachable, soft', emoji: '🤝' },
-  { label: 'High-Density Technical', value: 'technical', description: 'Compact, information-rich, functional', emoji: '📊' },
+  { label: 'Precision Editorial', value: 'precise', description: 'Clean, typographic, content-first', emoji: { name: '✒️' } },
+  { label: 'Operational Command Center', value: 'command', description: 'Dark, dense, data-driven', emoji: { name: '🎛️' } },
+  { label: 'Institutional Intelligence', value: 'institution', description: 'Professional, structured, trustworthy', emoji: { name: '🏛️' } },
+  { label: 'Luxury Minimal', value: 'lux', description: 'Spacious, elegant, premium', emoji: { name: '✨' } },
+  { label: 'Creative Technology', value: 'creative', description: 'Bold, experimental, modern', emoji: { name: '🌈' } },
+  { label: 'Warm & Human', value: 'warm', description: 'Friendly, approachable, soft', emoji: { name: '🤝' } },
+  { label: 'High-Density Technical', value: 'technical', description: 'Compact, information-rich, functional', emoji: { name: '📊' } },
 ];
 const MODES = [
-  { label: 'Quick Build', value: 'quick', description: 'Smaller app, one primary workflow', emoji: '⚡' },
-  { label: 'Guided Architect', value: 'guided', description: 'Serious product, full architecture', emoji: '🏗️' },
-  { label: 'Challenge Mode ⭐ Featured', value: 'challenge', description: 'Competition-optimized, full demo', emoji: '🏆' },
+  { label: 'Quick Build', value: 'quick', description: 'Smaller app, one primary workflow', emoji: { name: '⚡' } },
+  { label: 'Guided Architect', value: 'guided', description: 'Serious product, full architecture', emoji: { name: '🏗️' } },
+  { label: 'Challenge Mode ⭐ Featured', value: 'challenge', description: 'Competition-optimized, full demo', emoji: { name: '🏆' } },
 ];
 const TN = { ops:'Internal Operations Tool', cust:'Customer Portal', ai:'AI Product', edu:'Education Platform', mkt:'Marketplace', com:'Community Hub', crt:'Creative Experience' };
 const VN = { precise:'Precision Editorial', command:'Operational Command Center', institution:'Institutional Intelligence', lux:'Luxury Minimal', creative:'Creative Technology', warm:'Warm & Human', technical:'High-Density Technical' };
