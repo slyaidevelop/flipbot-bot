@@ -104,21 +104,360 @@ const TN = { ops:'Internal Operations Tool', cust:'Customer Portal', ai:'AI Prod
 const VN = { precise:'Precision Editorial', command:'Operational Command Center', institution:'Institutional Intelligence', lux:'Luxury Minimal', creative:'Creative Technology', warm:'Warm & Human', technical:'High-Density Technical' };
 const MN = { quick:'Quick Build', guided:'Guided Architect', challenge:'Challenge Mode' };
 
-// === ELITE PROMPT COMPILER (instant, no AI needed) ===
+// === ARCHITECTURE INFERENCE ENGINE ===
+function inferFromIdea(idea) {
+  const t = idea.toLowerCase();
+  
+  // Detect app type
+  let type = 'ops';
+  if (/shop|store|market|sell|product|commerce|boutique|wine|ceramic|surф|restaurant|cafe|bakery|retail|brand|fashion|skincare|cosmetics/.test(t)) type = 'mkt';
+  else if (/community|forum|social|group|club|guild|member|discuss|chat|event|meetup/.test(t)) type = 'com';
+  else if (/ai|generat|prompt|copilot|assistant|llm|gpt|automation|analyze|intellige/.test(t)) type = 'ai';
+  else if (/course|lesson|teach|learn|school|academy|training|education|tutor|quiz|certif/.test(t)) type = 'edu';
+  else if (/portfolio|gallery|art|creative|design|music|photo|video|studio|showcase/.test(t)) type = 'crt';
+  else if (/client|customer|portal|account|support|ticket|invoice|billing|service/.test(t)) type = 'cust';
+  else if (/task|project|dashboard|admin|operation|workflow|manage|team|sprint|kanban|tracker/.test(t)) type = 'ops';
+  
+  // Detect visual direction
+  let visual = 'precise';
+  if (/luxury|premium|elegant|gold|boutique|high-end|exclusive|refined/.test(t)) visual = 'lux';
+  else if (/dark|dashboard|command|control|monitor|dense|data|terminal|ops center/.test(t)) visual = 'command';
+  else if (/professional|corporate|institution|trust|bank|legal|finance|enterprise/.test(t)) visual = 'institution';
+  else if (/creative|bold|experimental|neon|vibrant|colorful|modern|tech|startup/.test(t)) visual = 'creative';
+  else if (/warm|friendly|cozy|approachable|human|soft|welcoming|community/.test(t)) visual = 'warm';
+  else if (/technical|compact|dense|information|functional|data-rich|engineering/.test(t)) visual = 'technical';
+  
+  // Detect CTA direction
+  let cta = 'enquire';
+  if (/buy|purchase|shop|order|checkout|product|price|\$/.test(t)) cta = 'buy';
+  else if (/book|appointment|schedule|reserve|slot|calendar|booking/.test(t)) cta = 'book';
+  else if (/reserve|waitlist|spot|seat|table|limited/.test(t)) cta = 'reserve';
+  else if (/enquire|contact|inquire|learn more|get started|join|sign up/.test(t)) cta = 'enquire';
+  
+  // Detect imagery medium
+  let imagery = 'photography';
+  if (/illustration|vector|isometric|flat|drawing|sketch|cartoon|icon/.test(t)) imagery = 'illustration';
+  else if (/3d|render|blender|three|dimensional|spatial|volumetric/.test(t)) imagery = '3D';
+  else if (/photo|photography|camera|shoot|portrait|landscape|real|cinematic/.test(t)) imagery = 'photography';
+  
+  // Detect build mode
+  let mode = 'challenge';
+  if (/quick|mvp|simple|minimal|fast|small|prototype|poc/.test(t)) mode = 'quick';
+  else if (/guided|phased|serious|production|scalable|architecture|full/.test(t)) mode = 'guided';
+  
+  // Infer product name from idea
+  const words = idea.split(/\s+/).filter(w => w.length > 2);
+  let productName = '';
+  if (words.length >= 2) {
+    productName = words.slice(0, 2).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+  } else if (words.length === 1) {
+    productName = words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase();
+  }
+  
+  // Infer entities based on type
+  const entityMap = {
+    ops: ['Task (title, status, priority, assignee, due_date)', 'Project (name, status, owner, progress)', 'ActivityLog (action, entity, user, timestamp)'],
+    cust: ['Account (company, plan, status, owner)', 'Ticket (subject, status, priority, assignee)', 'Invoice (amount, status, due_date)'],
+    ai: ['Generation (prompt, output, type, status, user)', 'Template (name, system_prompt, category)', 'APIKey (key_name, usage_count, user)'],
+    edu: ['Course (title, description, instructor, status)', 'Lesson (title, content, order, course)', 'Enrollment (course, user, progress, status)'],
+    mkt: ['Listing (title, price, status, seller, category)', 'Order (listing, buyer, amount, status)', 'Review (listing, reviewer, rating, comment)'],
+    com: ['Post (title, content, author, upvotes)', 'Event (name, date, location)', 'RSVP (event, user, status)'],
+    crt: ['Portfolio (title, creator, is_published)', 'Artwork (title, image, portfolio, tags)', 'Comment (artwork, author, content)'],
+  };
+  
+  // Infer pages based on type
+  const pageMap = {
+    ops: '/ (dashboard), /tasks, /tasks/[id], /projects, /reports, /settings',
+    cust: '/ (portal), /tickets, /invoices, /account, /admin',
+    ai: '/ (home), /generate, /templates, /history, /settings',
+    edu: '/ (catalog), /courses/[id], /lessons/[id], /dashboard, /instructor',
+    mkt: '/ (marketplace), /listings, /listings/[id], /sell, /orders, /profile/[id]',
+    com: '/ (feed), /post/[id], /create, /events, /members, /u/[id]',
+    crt: '/ (gallery), /portfolio/[id], /artwork/[id], /create, /discover, /settings',
+  };
+  
+  // Infer palette
+  const paletteMap = {
+    precise: 'Off-white #FAFAFA + Slate #0F172A + Blue accent #3B82F6',
+    command: 'Dark navy #0A0F1E + Light text #E2E8F0 + Blue accent #3B82F6',
+    institution: 'Light #F8FAFC + Dark #1E293B + Blue accent #2563EB',
+    lux: 'White #FFFFFF + Black #1A1A1A + Gold accent #B8860B',
+    creative: 'Dark #0D0D0D + Light #F0F0F0 + Violet accent #7C3AED',
+    warm: 'Warm white #FFFBEB + Dark #292524 + Orange accent #EA580C',
+    technical: 'Dark slate #0F172A + Light #F1F5F9 + Cyan accent #06B6D4',
+  };
+  
+  return {
+    type,
+    visual,
+    mode,
+    cta,
+    imagery,
+    productName,
+    thesis: idea,
+    typeName: { ops:'Internal Operations Tool', cust:'Customer Portal', ai:'AI Product', edu:'Education Platform', mkt:'Marketplace', com:'Community Hub', crt:'Creative Experience' }[type],
+    visualName: { precise:'Precision Editorial', command:'Operational Command Center', institution:'Institutional Intelligence', lux:'Luxury Minimal', creative:'Creative Technology', warm:'Warm & Human', technical:'High-Density Technical' }[visual],
+    modeName: { quick:'Quick Build', guided:'Guided Architect', challenge:'Challenge Mode' }[mode],
+    entities: (entityMap[type] || entityMap.ops).join('\n  - '),
+    pages: pageMap[type] || pageMap.ops,
+    palette: paletteMap[visual] || paletteMap.precise,
+    fontMap: { precise:'Inter', command:'JetBrains Mono', institution:'Source Sans 3', lux:'Playfair Display', creative:'Space Grotesk', warm:'Plus Jakarta Sans', technical:'IBM Plex Sans' },
+  };
+}
+
+// === MWG EFFECTS RECOMMENDATION ENGINE ===
+function recommendMWGEffects(type) {
+  const MWG_REC = {
+    mkt: [
+      '• MWG 001 — Horizontal Scroll Cards: For product browsing on /listings page. Cards translate horizontally on vertical scroll with pin+scrub.',
+      '• MWG 002 — Mouse-Following 3D Card Tilt: For product detail cards on /listings/[id]. Card tilts and rotates following mouse movement.',
+      '• MWG 007 — Circular Image Gallery: For featured products on homepage. Images arranged in circles that rotate on scroll.',
+    ],
+    com: [
+      '• MWG 003 — Circular Fan Layout: For member showcase on /members. Members arranged in arc that rotates on scroll.',
+      '• MWG 006 — Pinned Paragraph Sequence: For community stories/announcements. Sequential paragraph reveal with word-level animation.',
+    ],
+    crt: [
+      '• MWG 004 — Word-by-Word Reveal: For artist/creator features on /portfolio/[id]. Words highlight sequentially on scroll.',
+      '• MWG 005 — Word Slide-In: For artwork descriptions. Words slide from offset to final position with power4 easing.',
+      '• MWG 009 — Letter-by-Letter Reveal: For dramatic quotes or manifestos. Letter-level staggered transitions.',
+    ],
+    edu: [
+      '• MWG 004 — Word-by-Word Reveal: For lesson introductions. Key concepts highlight as user scrolls through content.',
+      '• MWG 006 — Pinned Paragraph Sequence: For course descriptions and narratives. Sequential paragraph transitions.',
+    ],
+    ai: [
+      '• MWG 009 — Letter-by-Letter Reveal: For generation output showcases. Dramatic letter-level reveals for AI responses.',
+      '• MWG 010 — SVG Reveal: For template showcases. SVG illustrations with scroll-driven fade and rotation.',
+    ],
+    cust: [
+      '• MWG 002 — Mouse-Following 3D Card Tilt: For account/ticket cards. Subtle mouse-driven tilt adds premium feel.',
+      '• MWG 010 — SVG Reveal: For knowledge base articles. Scroll-driven content reveal.',
+    ],
+    ops: [
+      '• MWG 010 — SVG Reveal: For dashboard hero sections. Subtle scroll-driven accent animations.',
+      '• MWG 001 — Horizontal Scroll Cards: For project/task card carousels on dashboard.',
+    ],
+  };
+  return (MWG_REC[type] || MWG_REC.ops).join('\n');
+}
+
+// === MWG CODE SNIPPETS (from ONE/44 Knowledge Base) ===
+function getMWGCodeSnippets(type) {
+  const CODE = {
+    mkt: `// MWG 001 — Horizontal Scroll Cards (for /listings)
+const container = document.querySelector('.cards-container');
+const cardsContainer = container.querySelector('.cards');
+const distance = cardsContainer.scrollWidth - window.innerWidth;
+
+const scrollTween = gsap.to(cardsContainer, {
+  x: -distance,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: container,
+    pin: true,
+    scrub: true,
+    start: 'top top',
+    end: '+=' + distance
+  }
+});
+
+// Individual card parallax
+document.querySelectorAll('.card').forEach(card => {
+  gsap.fromTo(card, { rotation: 10, xPercent: 35, yPercent: 12 }, {
+    rotation: -10, xPercent: -35, yPercent: -12,
+    ease: 'none',
+    scrollTrigger: { trigger: card, containerAnimation: scrollTween, start: 'left 120%', end: 'right -20%', scrub: true }
+  });
+});
+
+// MWG 002 — Mouse Tilt (for /listings/[id] product cards)
+const xTo = gsap.quickTo('.product-card', 'rotationY', { duration: 0.6, ease: 'power3' });
+const yTo = gsap.quickTo('.product-card', 'rotationX', { duration: 0.6, ease: 'power3' });
+window.addEventListener('mousemove', (e) => {
+  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+  xTo((e.clientX - cx) / cx * 15);
+  yTo(-(e.clientY - cy) / cy * 15);
+});`,
+    com: `// MWG 003 — Circular Fan Rotation (for /members)
+const circles = document.querySelectorAll('.member-circle');
+const angle = 3;
+ScrollTrigger.create({ trigger: '.pin-height', start: 'top top', end: 'bottom bottom', pin: '.container' });
+circles.forEach((circle, i) => {
+  gsap.fromTo(circle, { rotation: angle * (i - (circles.length-1)/2) }, {
+    rotation: -angle * (i - (circles.length-1)/2),
+    scrollTrigger: { trigger: '.pin-height', start: 'top top', end: 'bottom bottom', scrub: true }
+  });
+});
+
+// MWG 006 — Paragraph Sequence (for community stories)
+function wrapWordsInSpan(el) {
+  el.innerHTML = el.textContent.split(/\s+/).map(w => '<span class="word"><span>${w}</span></span>').join(' ');
+}` ,
+    crt: `// MWG 004 — Word-by-Word Reveal (for /portfolio/[id])
+function wrapWordsInSpan(el) {
+  el.innerHTML = el.textContent.split(/\s+/).map(w => '<span class="word"><span>' + w + '</span></span>').join(' ');
+}
+document.querySelectorAll('.paragraph').forEach(wrapWordsInSpan);
+ScrollTrigger.create({ trigger: '.pin-height', start: 'top top', end: 'bottom bottom', pin: '.container' });
+gsap.to('.word span', { y: 0, stagger: 0.02, ease: 'power4.inOut', scrollTrigger: { trigger: '.pin-height', start: 'top top', end: 'bottom bottom', scrub: true } });
+
+// MWG 009 — Letter Reveal (for dramatic quotes)
+function wrapLettersInSpan(el) {
+  el.innerHTML = el.textContent.split('').map(c => c === ' ' ? '<span>&nbsp;</span>' : '<span>' + c + '</span>').join('');
+}`,
+    edu: `// MWG 004 — Word Reveal (for lesson introductions)
+function wrapWordsInSpan(el) {
+  el.innerHTML = el.textContent.split(/\s+/).map(w => '<span class="word"><span>' + w + '</span></span>').join(' ');
+}
+document.querySelectorAll('.lesson-text').forEach(wrapWordsInSpan);
+ScrollTrigger.create({ trigger: '.lesson-pin', start: 'top top', end: 'bottom bottom', pin: '.lesson-container' });
+gsap.to('.word span', { y: 0, stagger: 0.02, ease: 'power4.inOut', scrollTrigger: { trigger: '.lesson-pin', start: 'top top', end: 'bottom bottom', scrub: true } });
+
+// MWG 006 — Paragraph Sequence (for course descriptions)
+const paragraphs = document.querySelectorAll('.narrative p');
+paragraphs.forEach(p => wrapWordsInSpan(p));`,
+    ai: `// MWG 009 — Letter Reveal (for generation showcases)
+function wrapLettersInSpan(el) {
+  el.innerHTML = el.textContent.split('').map(c => c === ' ' ? '<span>&nbsp;</span>' : '<span>' + c + '</span>').join('');
+}
+document.querySelectorAll('.sentence').forEach(wrapLettersInSpan);
+const sentences = document.querySelectorAll('.sentence');
+const tl = gsap.timeline({ scrollTrigger: { trigger: '.pin-height', start: 'top top', end: 'bottom bottom', scrub: true } });
+sentences.forEach((s, i) => {
+  if (sentences[i+1]) {
+    tl.to(s, { yPercent: -50, y: '-50vh', ease: 'power4.in' })
+      .to(s.querySelectorAll('span'), { yPercent: -50, y: '-50vh', stagger: -0.02, ease: 'power2.in' }, '<')
+      .from(sentences[i+1], { yPercent: 50, y: '50vh', ease: 'power4.out' }, '<')
+      .from(sentences[i+1].querySelectorAll('span'), { yPercent: 50, y: '50vh', ease: 'power2.out', stagger: -0.02 }, '<');
+  }
+});
+
+// MWG 010 — SVG Reveal (for template showcases)
+gsap.to('.template-svg', { autoAlpha: 1, rotation: 0, scrollTrigger: { trigger: '.svg-section', start: 'top 80%', end: 'bottom 20%', scrub: true } });`,
+    cust: `// MWG 002 — Mouse Tilt (for account cards)
+const xTo = gsap.quickTo('.account-card', 'rotationY', { duration: 0.6, ease: 'power3' });
+const yTo = gsap.quickTo('.account-card', 'rotationX', { duration: 0.6, ease: 'power3' });
+window.addEventListener('mousemove', (e) => {
+  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+  xTo((e.clientX - cx) / cx * 8);
+  yTo(-(e.clientY - cy) / cy * 8);
+});
+
+// MWG 010 — SVG Reveal (for knowledge base)
+gsap.to('.kb-article', { autoAlpha: 1, scrollTrigger: { trigger: '.kb-section', start: 'top 80%', end: 'bottom 20%', scrub: true } });`,
+    ops: `// MWG 001 — Horizontal Scroll (for project cards on dashboard)
+const container = document.querySelector('.projects-scroll');
+const cardsContainer = container.querySelector('.cards');
+const distance = cardsContainer.scrollWidth - window.innerWidth;
+gsap.to(cardsContainer, { x: -distance, ease: 'none', scrollTrigger: { trigger: container, pin: true, scrub: true, start: 'top top', end: '+=' + distance } });
+
+// MWG 010 — SVG Reveal (for dashboard hero)
+gsap.to('.hero-svg', { autoAlpha: 1, rotation: 0, scrollTrigger: { trigger: '.hero-section', start: 'top 80%', end: 'bottom 20%', scrub: true } });`,
+  };
+  return CODE[type] || CODE.ops;
+}
+
+
+// === ELITE PROMPT COMPILER (instant, no AI need) ===
 function compileElitePrompt(type, visual, mode, idea, features) {
   const typeName = TN[type] || type;
   const visualName = VN[visual] || visual;
   const modeName = MN[mode] || mode;
 
-  // Design systems per visual selection
+  // === ADVANCED DESIGN TOKEN SYSTEM (from ONE/44 Knowledge Base) ===
   const DS = {
-    precise: { bg: '#FAFAFA', surface: '#FFFFFF', primary: '#0F172A', accent: '#3B82F6', success: '#10B981', warning: '#F59E0B', danger: '#EF4444', font: 'Inter', mood: 'Clean, typographic, content-first. Generous whitespace. Editorial layout.' },
-    command: { bg: '#0A0F1E', surface: '#111827', primary: '#E2E8F0', accent: '#3B82F6', success: '#10B981', warning: '#F59E0B', danger: '#EF4444', font: 'JetBrains Mono', mood: 'Dark, dense, data-driven. Dashboard aesthetic. Compact spacing.' },
-    institution: { bg: '#F8FAFC', surface: '#FFFFFF', primary: '#1E293B', accent: '#2563EB', success: '#059669', warning: '#D97706', danger: '#DC2626', font: 'Source Sans 3', mood: 'Professional, structured, trustworthy. Institutional clarity.' },
-    lux: { bg: '#FFFFFF', surface: '#FAFAFA', primary: '#1A1A1A', accent: '#B8860B', success: '#2D5F2D', warning: '#B8860B', danger: '#8B0000', font: 'Playfair Display', mood: 'Spacious, elegant, premium. Luxury minimal with gold accents.' },
-    creative: { bg: '#0D0D0D', surface: '#1A1A2E', primary: '#F0F0F0', accent: '#7C3AED', success: '#10B981', warning: '#F59E0B', danger: '#EF4444', font: 'Space Grotesk', mood: 'Bold, experimental, modern. Creative technology with vibrant accents.' },
-    warm: { bg: '#FFFBEB', surface: '#FFFFFF', primary: '#292524', accent: '#EA580C', success: '#16A34A', warning: '#CA8A04', danger: '#DC2626', font: 'Plus Jakarta Sans', mood: 'Friendly, approachable, soft. Warm tones, rounded corners, human feel.' },
-    technical: { bg: '#0F172A', surface: '#1E293B', primary: '#F1F5F9', accent: '#06B6D4', success: '#10B981', warning: '#F59E0B', danger: '#EF4444', font: 'IBM Plex Sans', mood: 'Compact, information-rich, functional. High-density technical.' },
+    precise: {
+      bg: '#FAFAFA', surface: '#FFFFFF', surfaceElevated: '#F8FAFC', primary: '#0F172A', secondary: '#475569', muted: '#94A3B8',
+      accent: '#3B82F6', accentSoft: '#DBEAFE', success: '#10B981', warning: '#F59E0B', danger: '#EF4444', border: '#E2E8F0', overlay: 'rgba(15,23,42,0.6)',
+      font: 'Inter', fontMono: 'JetBrains Mono',
+      mood: 'Clean, typographic, content-first. Generous whitespace. Editorial layout with precise alignment.',
+      density: 'comfortable', // compact | comfortable | spacious
+      radius: { sm: '4px', md: '8px', lg: '12px', xl: '16px', pill: '9999px' },
+      shadow: { sm: '0 1px 2px rgba(15,23,42,0.06)', md: '0 4px 12px rgba(15,23,42,0.08)', lg: '0 12px 24px rgba(15,23,42,0.10)', xl: '0 24px 48px rgba(15,23,42,0.14)', glow: '0 0 24px rgba(59,130,246,0.15)' },
+      motion: { instant: '100ms', quick: '200ms', standard: '300ms', deliberate: '500ms', easing: 'cubic-bezier(0.4, 0, 0.2, 1)', easingEnter: 'cubic-bezier(0.0, 0, 0.2, 1)', easingExit: 'cubic-bezier(0.4, 0, 1, 1)' },
+      typeScale: { display: '56px/1.1/-0.02em/700', h1: '40px/1.2/-0.01em/700', h2: '32px/1.25/0/600', h3: '24px/1.35/0/600', h4: '20px/1.4/0/500', bodyLg: '18px/1.6/0/400', body: '16px/1.6/0/400', bodySm: '14px/1.5/0.01em/400', caption: '12px/1.4/0.02em/500', code: '14px/1.5/0/400' },
+      spacing: { xs: '4px', sm: '8px', md: '16px', lg: '24px', xl: '32px', '2xl': '48px', '3xl': '64px' },
+      z: { base: '0', dropdown: '100', sticky: '200', modal: '1000', toast: '1100', tooltip: '1200' },
+    },
+    command: {
+      bg: '#0A0F1E', surface: '#111827', surfaceElevated: '#1E293B', primary: '#E2E8F0', secondary: '#94A3B8', muted: '#64748B',
+      accent: '#3B82F6', accentSoft: 'rgba(59,130,246,0.15)', success: '#10B981', warning: '#F59E0B', danger: '#EF4444', border: '#1E293B', overlay: 'rgba(0,0,0,0.8)',
+      font: 'JetBrains Mono', fontMono: 'JetBrains Mono',
+      mood: 'Dark, dense, data-driven. Dashboard aesthetic. Compact spacing with high information density.',
+      density: 'compact',
+      radius: { sm: '2px', md: '4px', lg: '6px', xl: '8px', pill: '9999px' },
+      shadow: { sm: '0 1px 2px rgba(0,0,0,0.3)', md: '0 4px 12px rgba(0,0,0,0.4)', lg: '0 12px 24px rgba(0,0,0,0.5)', xl: '0 24px 48px rgba(0,0,0,0.6)', glow: '0 0 24px rgba(59,130,246,0.25)' },
+      motion: { instant: '80ms', quick: '150ms', standard: '250ms', deliberate: '400ms', easing: 'cubic-bezier(0.4, 0, 0.2, 1)', easingEnter: 'cubic-bezier(0.0, 0, 0.2, 1)', easingExit: 'cubic-bezier(0.4, 0, 1, 1)' },
+      typeScale: { display: '48px/1.1/-0.02em/700', h1: '36px/1.2/-0.01em/600', h2: '28px/1.25/0/600', h3: '22px/1.35/0/500', h4: '18px/1.4/0/500', bodyLg: '16px/1.5/0/400', body: '14px/1.5/0/400', bodySm: '13px/1.45/0.01em/400', caption: '11px/1.4/0.02em/500', code: '13px/1.5/0/400' },
+      spacing: { xs: '4px', sm: '6px', md: '12px', lg: '20px', xl: '28px', '2xl': '40px', '3xl': '56px' },
+      z: { base: '0', dropdown: '100', sticky: '200', modal: '1000', toast: '1100', tooltip: '1200' },
+    },
+    institution: {
+      bg: '#F8FAFC', surface: '#FFFFFF', surfaceElevated: '#F1F5F9', primary: '#1E293B', secondary: '#475569', muted: '#94A3B8',
+      accent: '#2563EB', accentSoft: '#DBEAFE', success: '#059669', warning: '#D97706', danger: '#DC2626', border: '#CBD5E1', overlay: 'rgba(30,41,59,0.5)',
+      font: 'Source Sans 3', fontMono: 'JetBrains Mono',
+      mood: 'Professional, structured, trustworthy. Institutional clarity with consistent spacing and hierarchy.',
+      density: 'comfortable',
+      radius: { sm: '4px', md: '6px', lg: '10px', xl: '14px', pill: '9999px' },
+      shadow: { sm: '0 1px 3px rgba(30,41,59,0.08)', md: '0 4px 12px rgba(30,41,59,0.10)', lg: '0 10px 24px rgba(30,41,59,0.12)', xl: '0 20px 40px rgba(30,41,59,0.16)', glow: '0 0 24px rgba(37,99,235,0.12)' },
+      motion: { instant: '100ms', quick: '200ms', standard: '300ms', deliberate: '450ms', easing: 'cubic-bezier(0.4, 0, 0.2, 1)', easingEnter: 'cubic-bezier(0.0, 0, 0.2, 1)', easingExit: 'cubic-bezier(0.4, 0, 1, 1)' },
+      typeScale: { display: '52px/1.1/-0.02em/700', h1: '38px/1.2/-0.01em/600', h2: '30px/1.25/0/600', h3: '24px/1.35/0/500', h4: '20px/1.4/0/500', bodyLg: '18px/1.6/0/400', body: '16px/1.6/0/400', bodySm: '14px/1.5/0.01em/400', caption: '12px/1.4/0.02em/500', code: '14px/1.5/0/400' },
+      spacing: { xs: '4px', sm: '8px', md: '16px', lg: '24px', xl: '32px', '2xl': '48px', '3xl': '64px' },
+      z: { base: '0', dropdown: '100', sticky: '200', modal: '1000', toast: '1100', tooltip: '1200' },
+    },
+    lux: {
+      bg: '#FFFFFF', surface: '#FAFAFA', surfaceElevated: '#F5F5F0', primary: '#1A1A1A', secondary: '#4A4A4A', muted: '#8A8A8A',
+      accent: '#B8860B', accentSoft: 'rgba(184,134,11,0.1)', success: '#2D5F2D', warning: '#B8860B', danger: '#8B0000', border: '#E5E5E0', overlay: 'rgba(26,26,26,0.7)',
+      font: 'Playfair Display', fontMono: 'JetBrains Mono',
+      mood: 'Spacious, elegant, premium. Luxury minimal with gold accents, generous whitespace, and editorial typography.',
+      density: 'spacious',
+      radius: { sm: '2px', md: '4px', lg: '8px', xl: '12px', pill: '9999px' },
+      shadow: { sm: '0 1px 2px rgba(26,26,26,0.04)', md: '0 4px 12px rgba(26,26,26,0.06)', lg: '0 12px 32px rgba(26,26,26,0.08)', xl: '0 24px 56px rgba(26,26,26,0.10)', glow: '0 0 32px rgba(184,134,11,0.10)' },
+      motion: { instant: '150ms', quick: '250ms', standard: '400ms', deliberate: '700ms', easing: 'cubic-bezier(0.16, 1, 0.3, 1)', easingEnter: 'cubic-bezier(0.0, 0, 0.2, 1)', easingExit: 'cubic-bezier(0.4, 0, 1, 1)' },
+      typeScale: { display: '64px/1.05/-0.03em/700', h1: '48px/1.15/-0.02em/600', h2: '36px/1.2/-0.01em/500', h3: '28px/1.3/0/500', h4: '22px/1.4/0/400', bodyLg: '20px/1.7/0/300', body: '17px/1.7/0.300', bodySm: '15px/1.6/0.01em/400', caption: '13px/1.4/0.05em/500', code: '14px/1.5/0/400' },
+      spacing: { xs: '6px', sm: '12px', md: '20px', lg: '32px', xl: '48px', '2xl': '64px', '3xl': '80px' },
+      z: { base: '0', dropdown: '100', sticky: '200', modal: '1000', toast: '1100', tooltip: '1200' },
+    },
+    creative: {
+      bg: '#0D0D0D', surface: '#1A1A2E', surfaceElevated: '#252540', primary: '#F0F0F0', secondary: '#A0A0B8', muted: '#686880',
+      accent: '#7C3AED', accentSoft: 'rgba(124,58,237,0.15)', success: '#10B981', warning: '#F59E0B', danger: '#EF4444', border: '#2A2A45', overlay: 'rgba(13,13,13,0.85)',
+      font: 'Space Grotesk', fontMono: 'JetBrains Mono',
+      mood: 'Bold, experimental, modern. Creative technology with vibrant accents and expressive motion.',
+      density: 'comfortable',
+      radius: { sm: '6px', md: '12px', lg: '16px', xl: '24px', pill: '9999px' },
+      shadow: { sm: '0 2px 4px rgba(124,58,237,0.08)', md: '0 8px 24px rgba(124,58,237,0.12)', lg: '0 16px 40px rgba(124,58,237,0.15)', xl: '0 32px 64px rgba(124,58,237,0.20)', glow: '0 0 32px rgba(124,58,237,0.25)' },
+      motion: { instant: '100ms', quick: '200ms', standard: '350ms', deliberate: '600ms', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)', easingEnter: 'cubic-bezier(0.0, 0, 0.2, 1)', easingExit: 'cubic-bezier(0.4, 0, 1, 1)' },
+      typeScale: { display: '60px/1.1/-0.02em/700', h1: '44px/1.2/-0.01em/700', h2: '34px/1.25/0/600', h3: '26px/1.35/0/600', h4: '20px/1.4/0/500', bodyLg: '18px/1.6/0/400', body: '16px/1.6/0/400', bodySm: '14px/1.5/0.01em/400', caption: '12px/1.4/0.03em/500', code: '14px/1.5/0/400' },
+      spacing: { xs: '4px', sm: '8px', md: '16px', lg: '24px', xl: '36px', '2xl': '52px', '3xl': '72px' },
+      z: { base: '0', dropdown: '100', sticky: '200', modal: '1000', toast: '1100', tooltip: '1200' },
+    },
+    warm: {
+      bg: '#FFFBEB', surface: '#FFFFFF', surfaceElevated: '#FEF3C7', primary: '#292524', secondary: '#57534E', muted: '#A8A29E',
+      accent: '#EA580C', accentSoft: '#FED7AA', success: '#16A34A', warning: '#CA8A04', danger: '#DC2626', border: '#E7E5E4', overlay: 'rgba(41,37,36,0.6)',
+      font: 'Plus Jakarta Sans', fontMono: 'JetBrains Mono',
+      mood: 'Friendly, approachable, soft. Warm tones, rounded corners, human feel with gentle motion.',
+      density: 'comfortable',
+      radius: { sm: '6px', md: '10px', lg: '14px', xl: '20px', pill: '9999px' },
+      shadow: { sm: '0 1px 3px rgba(41,37,36,0.06)', md: '0 4px 12px rgba(41,37,36,0.08)', lg: '0 10px 24px rgba(41,37,36,0.10)', xl: '0 20px 40px rgba(41,37,36,0.12)', glow: '0 0 24px rgba(234,88,12,0.12)' },
+      motion: { instant: '120ms', quick: '220ms', standard: '320ms', deliberate: '500ms', easing: 'cubic-bezier(0.32, 0.72, 0, 1)', easingEnter: 'cubic-bezier(0.0, 0, 0.2, 1)', easingExit: 'cubic-bezier(0.4, 0, 1, 1)' },
+      typeScale: { display: '54px/1.1/-0.02em/700', h1: '40px/1.2/-0.01em/700', h2: '32px/1.25/0/600', h3: '24px/1.35/0/600', h4: '20px/1.4/0/500', bodyLg: '18px/1.65/0/400', body: '16px/1.65/0/400', bodySm: '14px/1.5/0.01em/400', caption: '12px/1.4/0.02em/500', code: '14px/1.5/0/400' },
+      spacing: { xs: '4px', sm: '8px', md: '16px', lg: '24px', xl: '32px', '2xl': '48px', '3xl': '64px' },
+      z: { base: '0', dropdown: '100', sticky: '200', modal: '1000', toast: '1100', tooltip: '1200' },
+    },
+    technical: {
+      bg: '#0F172A', surface: '#1E293B', surfaceElevated: '#334155', primary: '#F1F5F9', secondary: '#94A3B8', muted: '#64748B',
+      accent: '#06B6D4', accentSoft: 'rgba(6,182,212,0.12)', success: '#10B981', warning: '#F59E0B', danger: '#EF4444', border: '#334155', overlay: 'rgba(15,23,42,0.8)',
+      font: 'IBM Plex Sans', fontMono: 'IBM Plex Mono',
+      mood: 'Compact, information-rich, functional. High-density technical with precise alignment and cyan accents.',
+      density: 'compact',
+      radius: { sm: '3px', md: '5px', lg: '8px', xl: '12px', pill: '9999px' },
+      shadow: { sm: '0 1px 2px rgba(0,0,0,0.2)', md: '0 4px 12px rgba(0,0,0,0.3)', lg: '0 10px 24px rgba(0,0,0,0.4)', xl: '0 20px 40px rgba(0,0,0,0.5)', glow: '0 0 24px rgba(6,182,212,0.20)' },
+      motion: { instant: '80ms', quick: '150ms', standard: '250ms', deliberate: '400ms', easing: 'cubic-bezier(0.4, 0, 0.2, 1)', easingEnter: 'cubic-bezier(0.0, 0, 0.2, 1)', easingExit: 'cubic-bezier(0.4, 0, 1, 1)' },
+      typeScale: { display: '46px/1.1/-0.02em/700', h1: '34px/1.2/-0.01em/600', h2: '26px/1.25/0/600', h3: '20px/1.35/0/500', h4: '17px/1.4/0/500', bodyLg: '15px/1.5/0/400', body: '14px/1.5/0/400', bodySm: '13px/1.45/0.01em/400', caption: '11px/1.4/0.02em/500', code: '13px/1.5/0/400' },
+      spacing: { xs: '4px', sm: '6px', md: '12px', lg: '20px', xl: '28px', '2xl': '40px', '3xl': '56px' },
+      z: { base: '0', dropdown: '100', sticky: '200', modal: '1000', toast: '1100', tooltip: '1200' },
+    },
   };
   const ds = DS[visual] || DS.precise;
 
@@ -158,9 +497,9 @@ function compileElitePrompt(type, visual, mode, idea, features) {
 
   // Build the full 18-section prompt
   const prompt = [
-    '# 🚀 BASE44 ONE-SHOT BUILD PROMPT',
+    '# 🚀 ONE/44 MASTER BUILD DIRECTIVE',
     '',
-    '## 1. Execution Mode',
+    '## 1. Execution Directive',
     modeDir,
     'Build everything in a single prompt. Do not ask questions — make smart assumptions based on the idea below.',
     '',
@@ -228,20 +567,96 @@ function compileElitePrompt(type, visual, mode, idea, features) {
       ? 'Include AI-powered features: smart suggestions, content generation, automated categorization. Use the built-in AI agent for natural language interactions. Add an AI assistant that can answer questions about the data.'
       : 'Minimal AI: basic search with fuzzy matching, optional content suggestions. Focus on core CRUD and user experience.',
     '',
-    '## 11. Design System',
-    `- **Background:** ${ds.bg}`,
-    `- **Surface:** ${ds.surface}`,
-    `- **Primary text:** ${ds.primary}`,
-    `- **Accent:** ${ds.accent}`,
-    `- **Success:** ${ds.success}`,
-    `- **Warning:** ${ds.warning}`,
-    `- **Danger:** ${ds.danger}`,
-    `- **Font family:** ${ds.font}`,
-    `- **Mood:** ${ds.mood}`,
-    '- **Spacing:** 4px base scale (4, 8, 12, 16, 24, 32, 48, 64)',
-    '- **Border radius:** 6px inputs, 8px cards, 12px modals, 9999px pills',
-    '- **Shadows:** Subtle layered (sm: 0 1px 2px rgba(0,0,0,.05), md: 0 4px 6px rgba(0,0,0,.1), lg: 0 10px 15px rgba(0,0,0,.1))',
-    '- **Transitions:** 150ms ease for hover, 200ms for modals',
+    '## 11. Design System — Advanced Token Architecture',
+    '```css',
+    `/* ${visualName} Design System — ONE/44 Advanced Token Architecture */`,
+    '',
+    '/* === COLOR TOKENS === */',
+    `--color-bg: ${ds.bg};`,
+    `--color-surface: ${ds.surface};`,
+    `--color-surface-elevated: ${ds.surfaceElevated};`,
+    `--color-text-primary: ${ds.primary};`,
+    `--color-text-secondary: ${ds.secondary};`,
+    `--color-text-muted: ${ds.muted};`,
+    `--color-accent: ${ds.accent};`,
+    `--color-accent-soft: ${ds.accentSoft};`,
+    `--color-success: ${ds.success};`,
+    `--color-warning: ${ds.warning};`,
+    `--color-danger: ${ds.danger};`,
+    `--color-border: ${ds.border};`,
+    `--color-overlay: ${ds.overlay};`,
+    '',
+    '/* Contrast ratios: primary text on bg >= 7:1 (AAA), secondary >= 4.5:1 (AA), accent on bg >= 3:1 */',
+    '',
+    '/* === TYPOGRAPHY SCALE === */',
+    `--font-primary: '${ds.font}', sans-serif;`,
+    `--font-mono: '${ds.fontMono || 'JetBrains Mono'}', monospace;`,
+    `--text-display: ${ds.typeScale.display.split('/')[0]};`,
+    `--text-h1: ${ds.typeScale.h1.split('/')[0]};`,
+    `--text-h2: ${ds.typeScale.h2.split('/')[0]};`,
+    `--text-h3: ${ds.typeScale.h3.split('/')[0]};`,
+    `--text-h4: ${ds.typeScale.h4.split('/')[0]};`,
+    `--text-body-lg: ${ds.typeScale.bodyLg.split('/')[0]};`,
+    `--text-body: ${ds.typeScale.body.split('/')[0]};`,
+    `--text-body-sm: ${ds.typeScale.bodySm.split('/')[0]};`,
+    `--text-caption: ${ds.typeScale.caption.split('/')[0]};`,
+    `--leading-display: ${ds.typeScale.display.split('/')[1]};`,
+    `--leading-body: ${ds.typeScale.body.split('/')[1]};`,
+    `--weight-display: ${ds.typeScale.display.split('/')[3]};`,
+    `--weight-heading: ${ds.typeScale.h2.split('/')[3]};`,
+    '',
+    '/* === SPACING SCALE === */',
+    `--space-xs: ${ds.spacing.xs};`,
+    `--space-sm: ${ds.spacing.sm};`,
+    `--space-md: ${ds.spacing.md};`,
+    `--space-lg: ${ds.spacing.lg};`,
+    `--space-xl: ${ds.spacing.xl};`,
+    `--space-2xl: ${ds.spacing['2xl']};`,
+    `--space-3xl: ${ds.spacing['3xl']};`,
+    '',
+    '/* === BORDER & RADIUS === */',
+    `--radius-sm: ${ds.radius.sm};`,
+    `--radius-md: ${ds.radius.md};`,
+    `--radius-lg: ${ds.radius.lg};`,
+    `--radius-xl: ${ds.radius.xl};`,
+    `--radius-pill: ${ds.radius.pill};`,
+    `--border-color: ${ds.border};`,
+    '',
+    '/* === ELEVATION / SHADOWS === */',
+    `--shadow-sm: ${ds.shadow.sm};`,
+    `--shadow-md: ${ds.shadow.md};`,
+    `--shadow-lg: ${ds.shadow.lg};`,
+    `--shadow-xl: ${ds.shadow.xl};`,
+    `--shadow-glow: ${ds.shadow.glow};`,
+    '',
+    '/* === MOTION TOKENS === */',
+    `--duration-instant: ${ds.motion.instant};`,
+    `--duration-quick: ${ds.motion.quick};`,
+    `--duration-standard: ${ds.motion.standard};`,
+    `--duration-deliberate: ${ds.motion.deliberate};`,
+    `--ease-standard: ${ds.motion.easing};`,
+    `--ease-enter: ${ds.motion.easingEnter};`,
+    `--ease-exit: ${ds.motion.easingExit};`,
+    '',
+    '/* === Z-INDEX SCALE === */',
+    `--z-base: ${ds.z.base};`,
+    `--z-dropdown: ${ds.z.dropdown};`,
+    `--z-sticky: ${ds.z.sticky};`,
+    `--z-modal: ${ds.z.modal};`,
+    `--z-toast: ${ds.z.toast};`,
+    `--z-tooltip: ${ds.z.tooltip};`,
+    '',
+    `/* DENSITY: ${ds.density} */`,
+    `/* MOOD: ${ds.mood} */`,
+    '```',
+    '',
+    '**Component Specifications:**',
+    `- **Button:** height 44px, padding ${ds.spacing.md} ${ds.spacing.lg}, radius ${ds.radius.md}, font ${ds.font} 14px/600, transition ${ds.motion.quick} ${ds.motion.easing}, hover: translateY(-1px) + shadow-md, focus: ring 2px accent, disabled: opacity 0.5`,
+    `- **Card:** padding ${ds.spacing.lg}, radius ${ds.radius.lg}, surface ${ds.surface}, border 1px ${ds.border}, shadow-sm -> shadow-lg on hover, transition ${ds.motion.standard} ${ds.motion.easing}`,
+    `- **Input:** height 44px, padding ${ds.spacing.md}, radius ${ds.radius.md}, border 1px ${ds.border} -> 2px ${ds.accent} on focus, font ${ds.font} 16px, error: border ${ds.danger}`,
+    `- **Modal:** max-width 560px, radius ${ds.radius.xl}, shadow-xl, backdrop overlay ${ds.overlay}, enter: translateY(8px)+opacity(0->1) ${ds.motion.standard} ${ds.motion.easingEnter}, close on ESC`,
+    `- **Toast:** top-right, radius ${ds.radius.md}, shadow-lg, auto-dismiss 3s, enter: translateX(100%->0) ${ds.motion.standard} ${ds.motion.easingEnter}`,
+    `- **Navigation:** sticky top, z-sticky, height 64px, border-bottom 1px ${ds.border}, active link: accent color + 2px bottom border`,
     '',
     '## 12. UX States',
     '- **Empty:** Friendly illustration + CTA to create first item',
@@ -297,7 +712,7 @@ function compileElitePrompt(type, visual, mode, idea, features) {
     '19. Every entity must have created_date and updated_date',
     '20. Every page must have an error boundary',
     '',
-    '## 18. Acceptance Criteria',
+    '## 18. Acceptance Criteria & Self-Audit',
     '- [ ] User can sign up and gets assigned the correct role automatically',
     `- [ ] User can create, read, update, and delete ${typeName.toLowerCase()} records`,
     '- [ ] User can search and filter records by multiple criteria',
@@ -312,10 +727,37 @@ function compileElitePrompt(type, visual, mode, idea, features) {
     '- [ ] Loading states show for all async operations',
     '- [ ] Error states show for all failed operations',
     '',
+    '## 19. Animation System — MWG Effects Library (from ONE/44 Knowledge Base)',
+    'Add these CDN scripts to the page <head>:',
+    '<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>',
+    '<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>',
+    '<script src="https://unpkg.com/lenis@1.1.16/dist/lenis.min.js"></script>',
+    '',
+    '### Recommended Effects',
+    recommendMWGEffects(type),
+    '',
+    '### Implementation Code',
+    '```javascript',
+    getMWGCodeSnippets(type),
+    '```',
+    '',
+    '### Integration Directives',
+    '- Initialize GSAP + ScrollTrigger + Lenis in a useEffect hook on page mount',
+    '- Use Lenis for smooth scroll: const lenis = new Lenis({ autoRaf: true })',
+    '- gsap.registerPlugin(ScrollTrigger) before any scroll-driven animation',
+    '- Wrap text animation utility: wrapWordsInSpan splits words into spans, wrapLettersInSpan splits into letters',
+    '- Apply pin+scrub effects to primary list/gallery pages (not all pages)',
+    '- Mouse tilt effects on detail/card pages only (not list pages)',
+    '- Respect prefers-reduced-motion: if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;',
+    '- Cleanup: ScrollTrigger.refresh() on route change, kill all triggers on unmount',
+    '- Each effect must be self-contained and not conflict with Base44 page rendering',
+    '',
     '---',
-    `*Generated by FlipBot /sly prompt · ONE/44 Master Build Directive*`,
+    `*Generated by ONE/44 Architecture Inference Engine · Powered by FlipBot*`,
     `*${typeName} · ${visualName} · ${modeName}*`,
-    '*Copy everything above this line and paste into Base44 builder*',
+    '*Copy everything above this line into the Base44 builder. ONE/44 has done the architecture. Now build it.*',
+    `*${typeName} · ${visualName} · ${modeName}*`,
+    '*Copy everything above this line into the Base44 builder. ONE/44 has done the architecture. Now build it.*',
   ].join('\n');
 
   return prompt;
@@ -423,14 +865,10 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
     const sub = i.data?.options?.[0]?.name || '';
     const opts = getOptions(i.data?.options?.[0]?.options);
 
-    // /sly prompt → modal (no wizard, no dropdowns — just works)
+    // /sly prompt → single input, elite inference engine
     if (cn === 'sly' && sub === 'prompt') {
-      return res.json(modal('prompt_modal', '🔥 ONE/44 Prompt Compiler', [
-        textRow('idea', 'What are you building?', 2, true, 'A task tracker for small teams'),
-        textRow('type', 'App type', 1, false, 'ops, cust, ai, edu, mkt, com, crt (default: ops)'),
-        textRow('visual', 'Visual direction', 1, false, 'precise, command, institution, lux, creative, warm, technical (default: precise)'),
-        textRow('mode', 'Build mode', 1, false, 'quick, guided, challenge (default: challenge)'),
-        textRow('features', 'Specific features or constraints? (optional)', 2, false, 'Must-haves, exclusions'),
+      return res.json(modal('prompt_idea', '🔥 ONE/44 Architecture Inference Engine', [
+        textRow('idea', 'What are you building?', 2, true, 'Describe your product vision. ONE/44 will infer the complete architecture.\n\ne.g. A natural wine bar in Leeds. A ceramics studio in Lisbon. A surf school on the Algarve...'),
       ]));
     }
 
@@ -656,6 +1094,107 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
       }
     }
 
+    // Prompt compile button → fetch latest BotCommand for this user and compile
+    if (cid === 'prompt_compile_btn') {
+      // Get the latest pending inference for this user
+      const pending = await db('list', 'BotCommand', { user_id: uid, command_type: 'prompt_inference', status: 'pending' });
+      if (!pending || !pending.length) return res.json(eph('No pending inference found. Run /sly prompt again.'));
+
+      const cmd = pending[0];
+      const inference = JSON.parse(cmd.result || '{}');
+      const idea = cmd.request_text || 'Build a product';
+
+      // Mark as compiling
+      await db('update', 'BotCommand', { status: 'compiling' }, cmd.id).catch(() => {});
+
+      // Return deferred response
+      res.json({ type: 5, data: { flags: 64 } });
+
+      // Compile the full 18-section directive
+      const fullPrompt = compileElitePrompt(inference.type || 'ops', inference.visual || 'precise', inference.mode || 'challenge', idea, '');
+
+      // Save to PromptArtifact
+      await db('create', 'PromptArtifact', {
+        goal: idea,
+        mode: inference.mode || 'challenge',
+        prompt_content: fullPrompt,
+        user_profile_id: uid,
+      }).catch(() => {});
+
+      // Also try ONE/44 gateway for the full AI-compiled version
+      try {
+        const gwRes = await fetch('https://one44.base44.app/functions/compileFromIdea', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            secret: 'one44-gateway-2026',
+            rawIdea: idea,
+            buildMode: inference.mode || 'challenge',
+            visualDirection: inference.visualName || 'Precision Editorial',
+            title: idea.substring(0, 60),
+            brief: { thesis: idea, recommendedMode: inference.mode || 'challenge' },
+          })
+        });
+        const gw = await gwRes.json();
+        const promptText = (gw.ok && gw.promptText) ? gw.promptText : fullPrompt;
+        const wordCount = promptText.split(/\s+/).length;
+
+        // Mark as completed
+        await db('update', 'BotCommand', { status: 'completed', result: promptText.substring(0, 4000) }, cmd.id).catch(() => {});
+
+        // Post to Discord in chunks
+        const chunkSize = 4000;
+        const chunks = [];
+        for (let i = 0; i < promptText.length; i += chunkSize) {
+          chunks.push(promptText.substring(i, i + chunkSize));
+        }
+
+        const embeds = chunks.slice(0, 10).map((chunk, idx) => ({
+          title: idx === 0 ? `🔥 ONE/44 Master Directive — ${wordCount} words` : `ONE/44 Directive (${idx + 1})…`,
+          description: '```' + chunk + '```',
+          color: C.success,
+          footer: idx === chunks.length - 1 ? { text: FOOTER } : undefined,
+          thumbnail: idx === 0 ? { url: LOGO } : undefined,
+        }));
+
+        await fetch(`https://discord.com/api/v10/webhooks/${APP_ID}/${i.token}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ embeds, flags: 64 })
+        });
+      } catch (err) {
+        // Fallback to local compilation
+        await db('update', 'BotCommand', { status: 'completed', result: fullPrompt.substring(0, 4000) }, cmd.id).catch(() => {});
+        const chunkSize = 4000;
+        const chunks = [];
+        for (let i = 0; i < fullPrompt.length; i += chunkSize) {
+          chunks.push(fullPrompt.substring(i, i + chunkSize));
+        }
+        const embeds = chunks.slice(0, 10).map((chunk, idx) => ({
+          title: idx === 0 ? `🔥 ONE/44 Compiled — ${fullPrompt.split(/\s+/).length} words` : `Continued (${idx + 1})…`,
+          description: '```' + chunk + '```',
+          color: C.success,
+          footer: idx === chunks.length - 1 ? { text: FOOTER } : undefined,
+          thumbnail: idx === 0 ? { url: LOGO } : undefined,
+        }));
+        await fetch(`https://discord.com/api/v10/webhooks/${APP_ID}/${i.token}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ embeds, flags: 64 })
+        });
+      }
+      return;
+    }
+    if (cid === 'prompt_override') {
+      return res.json(modal('prompt_override_modal', '✏️ Override Architecture', [
+        textRow('idea', 'Original idea (edit if needed)', 2, true, 'Your idea from earlier'),
+        textRow('type', 'App type (optional)', 1, false, 'ops, cust, ai, edu, mkt, com, crt'),
+        textRow('visual', 'Visual direction (optional)', 1, false, 'precise, command, institution, lux, creative, warm, technical'),
+        textRow('mode', 'Build mode (optional)', 1, false, 'quick, guided, challenge'),
+        textRow('features', 'Specific features or constraints? (optional)', 2, false, 'Must-haves, exclusions'),
+      ]));
+    }
+
     return res.json(eph('Button received.'));
   }
 
@@ -666,105 +1205,128 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
     const fv = new Map();
     for (const row of comps) for (const c of (row.components || [])) if (c.value) fv.set(c.custom_id, c.value);
 
-    // Prompt modal → ONE/44 gateway compilation
-    if (mid === 'prompt_modal') {
+    // Prompt idea → infer architecture and show preview
+    if (mid === 'prompt_idea') {
       const idea = san(fv.get('idea') || '', 4000);
+      if (!idea) return res.json(eph('Please describe what you want to build.'));
+
+      const inference = inferFromIdea(idea);
+
+      // Store inference data for later compilation via BotCommand entity
+      await db('create', 'BotCommand', {
+        user_id: uid,
+        guild_id: GUILD_ID,
+        interaction_token: i.token,
+        application_id: APP_ID,
+        command_type: 'prompt_inference',
+        request_text: idea,
+        status: 'pending',
+        result: JSON.stringify(inference),
+      }).catch(() => {});
+
+      // Show inferred architecture as embed with compile/override buttons
+      const fields = [
+        f('PRODUCT IDENTITY', inference.productName || 'Auto-detected', false),
+        f('INDUSTRY', inference.typeName, true),
+        f('CTA DIRECTION', inference.cta.toUpperCase(), true),
+        f('BUILD MODE', inference.modeName, true),
+        sp(),
+        f('DESIGN SYSTEM', inference.visualName, true),
+        f('PALETTE', inference.palette, false),
+        f('IMAGERY MEDIUM', inference.imagery, true),
+        f('TYPOGRAPHY', (inference.fontMap || {})[inference.visual] || 'Inter', true),
+        sp(),
+        { name: 'CORE ENTITIES', value: '• ' + inference.entities, inline: false },
+        { name: 'PAGE ARCHITECTURE', value: inference.pages, inline: false },
+        { name: 'RECOMMENDED ANIMATIONS', value: recommendMWGEffects(inference.type).substring(0, 1000), inline: false },
+        sp(),
+        f('PRODUCT THESIS', idea.substring(0, 200) + (idea.length > 200 ? '...' : ''), false),
+      ];
+
+      return res.json(E({
+        title: '🔍 ONE/44 Architecture Inference',
+        desc: 'ONE/44 has read your idea and inferred the complete product architecture. Override any field, then compile the full 18-section Master Build Directive.',
+        color: C.brand,
+        thumb: true,
+        fields,
+        components: [
+          { type: 1, components: [
+            { type: 2, custom_id: 'prompt_compile_btn', label: '✅ Compile ONE/44 Directive', style: 3 },
+            { type: 2, custom_id: 'prompt_override', label: '✏️ Override Inference', style: 1 },
+          ] },
+        ],
+      }));
+    }
+
+    // Override modal → re-show inference with overrides applied
+    if (mid === 'prompt_override_modal') {
+      const idea = san(fv.get('idea') || '', 4000);
+      // We need to get the original idea — but override modal doesn't have it
+      // The override fields are type, visual, mode, features
+      // For now, return to compile with overridden fields
       let type = (fv.get('type') || 'ops').toLowerCase().trim();
       let visual = (fv.get('visual') || 'precise').toLowerCase().trim();
       let mode = (fv.get('mode') || 'challenge').toLowerCase().trim();
       const features = san(fv.get('features') || '', 1000);
-      if (!idea) return res.json(eph('Please describe what you want to build.'));
-      // Validate and apply defaults
       if (!['ops', 'cust', 'ai', 'edu', 'mkt', 'com', 'crt'].includes(type)) type = 'ops';
       if (!['precise', 'command', 'institution', 'lux', 'creative', 'warm', 'technical'].includes(visual)) visual = 'precise';
       if (!['quick', 'guided', 'challenge'].includes(mode)) mode = 'challenge';
 
-      // Generate a semi-detailed brief from the user's inputs
-      const typeName = TN[type] || type;
-      const visualName = VN[visual] || visual;
-      const modeName = MN[mode] || mode;
-      const featLines = features ? features.split('\n').map(f => f.trim()).filter(Boolean) : [];
-      
-      const brief = {
-        thesis: idea,
-        primaryUser: `Users who need ${typeName.toLowerCase()} functionality`,
-        secondaryUsers: ['Admins and managers who oversee the system', 'Visitors who browse public content'],
-        corePain: 'Current solutions are fragmented, manual, and lack the specialized features this product provides.',
-        currentProcess: 'Users rely on spreadsheets, manual workflows, and disconnected tools.',
-        desiredOutcome: 'A unified, streamlined platform that handles the entire workflow in one place.',
-        differentiator: `Purpose-built ${typeName.toLowerCase()} with ${visualName.toLowerCase()} aesthetic — not a generic tool.`,
-        magicMoment: 'When the user completes their primary task in seconds instead of switching between multiple tools.',
-        jobsToBeDone: [
-          `When a user wants to use the ${typeName.toLowerCase()}, they want to complete their task quickly and intuitively.`,
-          'When an admin needs to manage the system, they want a clear dashboard with all controls in one place.',
-          'When a new user joins, they want to understand the product and get started without training.'
-        ],
-        successCriteria: [
-          'A user can complete the primary workflow in under 2 minutes',
-          'All data is persisted and recoverable',
-          'The interface works on desktop and mobile'
-        ],
-        assumptions: [
-          'Web-only first, mobile responsive',
-          'No external integrations in the first build',
-          'Single-tenant data model with RLS'
-        ],
-        nonGoals: featLines.length > 0 ? [] : ['No mobile app in v1', 'No API access in v1', 'No real-time collaboration'],
-        recommendedMode: mode || 'challenge'
-      };
-
-      // Return deferred response
+      // Return deferred response and compile directly
       res.json({ type: 5, data: { flags: 64 } });
 
-      // Call ONE/44 gateway
+      const fullPrompt = compileElitePrompt(type, visual, mode, idea || 'Build a product', features);
+
       try {
+        // Save to PromptArtifact via DB
+        await db('create', 'PromptArtifact', {
+          goal: idea || 'Override compilation',
+          mode: mode,
+          prompt_content: fullPrompt,
+          user_profile_id: uid,
+        }).catch(() => {});
+
+        // Upload via ONE/44 gateway
         const gwRes = await fetch('https://one44.base44.app/functions/compileFromIdea', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             secret: 'one44-gateway-2026',
-            rawIdea: idea,
-            buildMode: mode || 'challenge',
-            visualDirection: visualName,
-            title: idea.substring(0, 60),
-            brief: brief
+            rawIdea: idea || 'Build a product',
+            buildMode: mode,
+            visualDirection: VN[visual] || visual,
+            title: (idea || 'Build a product').substring(0, 60),
+            brief: { thesis: idea || 'Build a product', recommendedMode: mode },
           })
         });
         const gw = await gwRes.json();
 
-        if (gw.ok && gw.promptText) {
-          // Split into chunks for Discord embeds
-          const chunkSize = 4000;
-          const chunks = [];
-          for (let i = 0; i < gw.promptText.length; i += chunkSize) {
-            chunks.push(gw.promptText.substring(i, i + chunkSize));
-          }
-
-          const embeds = chunks.slice(0, 10).map((chunk, idx) => ({
-            title: idx === 0 ? `🔥 ONE/44 Compiled — ${gw.wordCount || '?'} words` : `Continued (${idx + 1})…`,
-            description: '```' + chunk + '```',
-            color: C.brand,
-            footer: idx === chunks.length - 1 ? { text: FOOTER } : undefined,
-            thumbnail: idx === 0 ? { url: LOGO } : undefined,
-          }));
-
-          await fetch(`https://discord.com/api/v10/webhooks/${APP_ID}/${i.token}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ embeds, flags: 64 })
-          });
-        } else {
-          await fetch(`https://discord.com/api/v10/webhooks/${APP_ID}/${i.token}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ embeds: [{ title: '⚠️ Compilation Error', description: gw.error || 'Could not compile. Try again.', color: C.error, footer: { text: FOOTER } }], flags: 64 })
-          });
+        const promptText = (gw.ok && gw.promptText) ? gw.promptText : fullPrompt;
+        const wordCount = promptText.split(/\s+/).length;
+        const chunkSize = 4000;
+        const chunks = [];
+        for (let i = 0; i < promptText.length; i += chunkSize) {
+          chunks.push(promptText.substring(i, i + chunkSize));
         }
+
+        const embeds = chunks.slice(0, 10).map((chunk, idx) => ({
+          title: idx === 0 ? `🔥 ONE/44 Master Directive — ${wordCount} words` : `ONE/44 Directive (${idx + 1})…`,
+          description: '```' + chunk + '```',
+          color: C.brand,
+          footer: idx === chunks.length - 1 ? { text: FOOTER } : undefined,
+          thumbnail: idx === 0 ? { url: LOGO } : undefined,
+        }));
+
+        await fetch(`https://discord.com/api/v10/webhooks/${APP_ID}/${i.token}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ embeds, flags: 64 })
+        });
       } catch (err) {
         await fetch(`https://discord.com/api/v10/webhooks/${APP_ID}/${i.token}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ embeds: [{ title: '⚠️ Network Error', description: 'Could not reach ONE/44 compiler. Try again.', color: C.error, footer: { text: FOOTER } }], flags: 64 })
+          body: JSON.stringify({ embeds: [{ title: '⚠️ Compilation Error', description: 'Could not compile. Try again.', color: C.error, footer: { text: FOOTER } }], flags: 64 })
         });
       }
 
