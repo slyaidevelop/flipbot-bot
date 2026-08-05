@@ -350,7 +350,7 @@ function healthEmbed(lat) {
 function commandsEmbed() {
   return E({ title: '🤖 ONE/44 OS — Command Suite', desc: '12 commands for the full build pipeline:', color: C.brand, thumb: true, fields: [
     f('/sly prompt', '🔥 Compile architecture', false), f('/sly propose', '📄 Generate proposal', false),
-    f('/sly emails', '📧 Create email templates', false), f('/sly visuals', '📸 Product visuals (Kive)', false),
+    f('/sly emails', '📧 Create email templates', false), f('/sly visuals', '📸 Product visuals', false),
     f('/sly launch', '🚀 Full launch pipeline', false), f('/sly build', '🏗️ AI build analysis', false),
     f('/sly rescue', '🔧 Debug broken builds', false), f('/sly audit', '🔍 Review app URL', false),
     f('/sly docs', '📚 Search Base44 docs', false), f('/sly ship', '🚢 Showcase project', false),
@@ -434,8 +434,10 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
       ]));
     }
 
-    // /sly propose → proposal modal
+    // /sly propose → ONE/44 Builder+ required
     if (cn === 'sly' && sub === 'propose') {
+      // TODO: Check ONE/44 subscription tier (Builder+) via Subscription entity
+      // For now, allow in beta
       return res.json(modal('propose_modal', '📄 Generate Proposal', [
         textRow('idea', 'What are you building?', 2, true, 'Describe the app or project'),
         textRow('client_name', 'Client name (optional)', 1, false, 'Who is this proposal for?'),
@@ -445,8 +447,10 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
       ]));
     }
 
-    // /sly emails → email template modal
+    // /sly emails → ONE/44 Builder+ required
     if (cn === 'sly' && sub === 'emails') {
+      // TODO: Check ONE/44 subscription tier (Builder+) via Subscription entity
+      // For now, allow in beta
       return res.json(modal('emails_modal', '📧 Generate Email Templates', [
         textRow('app_name', 'App name', 1, true, 'Your product name'),
         textRow('design_style', 'Design style (optional)', 1, false, 'precise, command, lux, creative, warm, technical'),
@@ -455,8 +459,10 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
       ]));
     }
 
-    // /sly visuals → Kive product visual modal
+    // /sly visuals → ONE/44 Studio+ required
     if (cn === 'sly' && sub === 'visuals') {
+      // TODO: Check ONE/44 subscription tier (Studio+) via Subscription entity
+      // For now, allow in beta
       return res.json(modal('visuals_modal', '📸 Generate Product Visuals', [
         textRow('product_url', 'Product URL or image URL', 1, true, 'https://...'),
         textRow('studio', 'Studio style (optional)', 1, false, 'e.g. Soho Streetstyle, Cobalt Studio'),
@@ -465,8 +471,10 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
       ]));
     }
 
-    // /sly launch → full pipeline modal
+    // /sly launch → ONE/44 Studio+ required
     if (cn === 'sly' && sub === 'launch') {
+      // TODO: Check ONE/44 subscription tier (Studio+) via Subscription entity
+      // For now, allow in beta
       return res.json(modal('launch_modal', '🚀 Full Launch Pipeline', [
         textRow('idea', 'What are you building?', 2, true, 'Describe your app idea'),
         textRow('type', 'App type (optional)', 1, false, 'ops, cust, ai, edu, mkt, com, crt (default: ops)'),
@@ -499,31 +507,60 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
       textRow('project_category', 'Category', 1, false, 'SaaS, Tools...'),
     ]));
 
-    // /sly upgrade — routes to ONE/44 checkout
+    // /sly upgrade — split pricing (FlipBot + ONE/44)
     if (cn === 'sly' && sub === 'upgrade') {
+      const tool = san(opts.get('tool') || '', 10).toLowerCase().trim();
       const tier = san(opts.get('tier') || '', 20).toLowerCase().trim();
       const ONE44_CHECKOUT = 'https://one44.base44.app/checkout';
-      const tierInfo = {
-        builder: { name: 'Builder', price: '$15/mo', desc: 'Compiler + proposals + email templates. Full /sly suite, 500 cmds/mo, 3 bots.' },
-        studio: { name: 'Studio', price: '$49/mo', desc: 'Everything + AI product visuals. Unlimited bots, commands, multiple servers.' },
-        bespoke: { name: 'Bespoke', price: '$149/mo', desc: 'White-glove: custom AI studios, branded deliverables, custom Discord server setup, priority processing.' },
+      const FLIPBOT_CHECKOUT = 'https://flipbot.base44.app/checkout';
+
+      // ONE/44 tier checkout
+      const one44Tiers = {
+        builder: { name: 'Builder', price: '$15/mo', desc: 'Proposals + email templates. Full /sly suite unlocked.' },
+        studio: { name: 'Studio', price: '$49/mo', desc: 'Everything + AI product visuals. Unlimited everything.' },
+        bespoke: { name: 'Bespoke', price: '$149/mo', desc: 'White-glove: custom AI studios, branded deliverables, priority processing.' },
       };
-      if (tier && tierInfo[tier]) {
-        const ti = tierInfo[tier];
-        const checkoutUrl = ONE44_CHECKOUT + '?tier=' + tier + '&discord=' + uid;
-        return res.json(E({ title: '💎 Upgrade to ' + ti.name, desc: ti.desc, color: C.brand, thumb: true, fields: [
-          f('Price', ti.price), f('Tier', ti.name), sp(),
-          { name: '🔗 Complete checkout at ONE/44', value: checkoutUrl, inline: false },
-          tip('Payment processed by ONE/44. Bot access updates automatically after checkout.'),
+
+      // FlipBot tier checkout
+      const flipbotTiers = {
+        pro: { name: 'Pro', price: '$9/mo', desc: '3 bots, 500 cmds/mo, custom modules.' },
+        unlimited: { name: 'Unlimited', price: '$25/mo', desc: 'Unlimited bots, commands, servers. Priority support.' },
+      };
+
+      // Specific ONE/44 tier
+      if (tool === 'one44' && tier && one44Tiers[tier]) {
+        const ti = one44Tiers[tier];
+        const url = ONE44_CHECKOUT + '?tier=' + tier + '&discord=' + uid;
+        return res.json(E({ title: '💎 ONE/44 — ' + ti.name, desc: ti.desc, color: C.brand, thumb: true, fields: [
+          f('Price', ti.price), f('Product', 'ONE/44'), sp(),
+          { name: '🔗 Checkout', value: url, inline: false },
+          tip('Payment processed by ONE/44. Access updates automatically.'),
         ]}));
       }
-      return res.json(E({ title: '💎 ONE/44 OS — Pricing', desc: 'Your build, compiled — from idea to launch. Payment processed at ONE/44.', color: C.brand, thumb: true, fields: [
-        f('Free', '$0 · Compiler + community · 1 bot · 50 cmds/mo'),
-        f('Builder', '$15/mo · Proposals + emails · 500 cmds · 3 bots'),
-        f('Studio', '$49/mo · + AI visuals · ∞ bots · ∞ cmds'),
-        f('Bespoke', '$149/mo · White-glove · Custom everything'),
+
+      // Specific FlipBot tier
+      if (tool === 'flipbot' && tier && flipbotTiers[tier]) {
+        const ti = flipbotTiers[tier];
+        const url = FLIPBOT_CHECKOUT + '?tier=' + tier + '&discord=' + uid;
+        return res.json(E({ title: '🤖 FlipBot — ' + ti.name, desc: ti.desc, color: C.brand, thumb: true, fields: [
+          f('Price', ti.price), f('Product', 'FlipBot'), sp(),
+          { name: '🔗 Checkout', value: url, inline: false },
+          tip('Payment processed by FlipBot. Bot access updates automatically.'),
+        ]}));
+      }
+
+      // Default: show both pricing tables
+      return res.json(E({ title: '💎 Pricing — ONE/44 × FlipBot', desc: 'Two products. Pick what you need.', color: C.brand, thumb: true, fields: [
+        f('🤖 FlipBot — Free', '$0 · 1 bot · 50 cmds/mo · Server creation'),
+        f('🤖 FlipBot — Pro', '$9/mo · 3 bots · 500 cmds · Custom modules'),
+        f('🤖 FlipBot — Unlimited', '$25/mo · ∞ bots · ∞ cmds · Priority support'),
         sp(),
-        tip('Example: `/sly upgrade builder` → checkout at ONE/44'),
+        f('💎 ONE/44 — Free', '$0 · Prompt compiler · Community'),
+        f('💎 ONE/44 — Builder', '$15/mo · Proposals + emails'),
+        f('💎 ONE/44 — Studio', '$49/mo · + AI product visuals · Unlimited'),
+        f('💎 ONE/44 — Bespoke', '$149/mo · White-glove · Custom everything'),
+        sp(),
+        tip('`/sly upgrade tool:one44 tier:builder` or `/sly upgrade tool:flipbot tier:pro`'),
       ]}));
     }
 
@@ -878,7 +915,7 @@ async function registerCommands() {
         { name: 'docs', description: '📚 Search Base44 docs', type: 1, options: [{ name: 'query', description: 'Search query', type: 3, required: true }] },
         { name: 'ship', description: '🚢 Showcase your project', type: 1 },
         { name: 'request', description: '🧩 Browse add-on modules', type: 1 },
-        { name: 'upgrade', description: '💎 View pricing', type: 1, options: [{ name: 'tier', description: 'builder, studio, bespoke', type: 3 }] },
+        { name: 'upgrade', description: '💎 View pricing', type: 1, options: [{ name: 'tool', description: 'flipbot or one44', type: 3 }, { name: 'tier', description: 'pro, unlimited (FlipBot) / builder, studio, bespoke (ONE/44)', type: 3 }] },
       ]
     },
     { name: 'start', description: '⚡ Get started with ONE/44 OS' },
