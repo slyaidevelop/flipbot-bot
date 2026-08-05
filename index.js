@@ -367,7 +367,7 @@ function guideEmbed() {
   ]});
 }
 function startResponse() {
-  return { type: 4, data: { embeds: [embed("⚡ ONE/44 OS — Let's Get Started", "## The Base44 Builder Copilot for Discord\n**🎉 Free Beta — All features unlocked.**\n\nYour build, compiled — from idea to launch. Architecture, proposals, emails, and product visuals in one pipeline.", C.brand, [f('🚀 Create','Server, bot, or both',false), f('📖 Guide','Step-by-step walkthrough',false), f('🔒 Security','How credentials are handled',false), f('🤖 Commands','Preview the /sly suite',false), sp()], true)], components: [{ type: 1, components: [
+  return { type: 4, data: { embeds: [embed("⚡ ONE/44 OS — Let's Get Started", "## The Base44 Builder Copilot for Discord\n**🎉 Free Beta — All features unlocked.**\n\nYour build, compiled — from idea to launch. Architecture, proposals, emails, and product visuals in one pipeline.\n\n**🔒 Beta Access — Invite Only**\nRequest access at flipbot.base44.app", C.brand, [f('🚀 Create','Server, bot, or both',false), f('📖 Guide','Step-by-step walkthrough',false), f('🔒 Security','How credentials are handled',false), f('🤖 Commands','Preview the /sly suite',false), sp()], true)], components: [{ type: 1, components: [
     { type: 2, custom_id: 'start_create', label: '🚀 Create', style: 3 },
     { type: 2, custom_id: 'start_guide', label: '📖 Guide', style: 1 },
     { type: 2, custom_id: 'start_security', label: '🔒 Security', style: 1 },
