@@ -511,8 +511,7 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
     if (cn === 'sly' && sub === 'upgrade') {
       const tool = san(opts.get('tool') || '', 10).toLowerCase().trim();
       const tier = san(opts.get('tier') || '', 20).toLowerCase().trim();
-      const ONE44_CHECKOUT = 'https://one44.base44.app/checkout';
-      const FLIPBOT_CHECKOUT = 'https://flipbot.base44.app/checkout';
+      const CHECKOUT = 'https://one44.base44.app/checkout';
 
       // ONE/44 tier checkout
       const one44Tiers = {
@@ -530,7 +529,7 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
       // Specific ONE/44 tier
       if (tool === 'one44' && tier && one44Tiers[tier]) {
         const ti = one44Tiers[tier];
-        const url = ONE44_CHECKOUT + '?tier=' + tier + '&discord=' + uid;
+        const url = CHECKOUT + '?tool=one44&tier=' + tier + '&discord=' + uid;
         return res.json(E({ title: '💎 ONE/44 — ' + ti.name, desc: ti.desc, color: C.brand, thumb: true, fields: [
           f('Price', ti.price), f('Product', 'ONE/44'), sp(),
           { name: '🔗 Checkout', value: url, inline: false },
@@ -541,11 +540,11 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
       // Specific FlipBot tier
       if (tool === 'flipbot' && tier && flipbotTiers[tier]) {
         const ti = flipbotTiers[tier];
-        const url = FLIPBOT_CHECKOUT + '?tier=' + tier + '&discord=' + uid;
+        const url = CHECKOUT + '?tool=flipbot&tier=' + tier + '&discord=' + uid;
         return res.json(E({ title: '🤖 FlipBot — ' + ti.name, desc: ti.desc, color: C.brand, thumb: true, fields: [
           f('Price', ti.price), f('Product', 'FlipBot'), sp(),
           { name: '🔗 Checkout', value: url, inline: false },
-          tip('Payment processed by FlipBot. Bot access updates automatically.'),
+          tip('Payment processed by ONE/44. Access updates automatically.'),
         ]}));
       }
 
