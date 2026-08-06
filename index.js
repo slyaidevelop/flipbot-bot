@@ -108,6 +108,10 @@ const MN = { quick:'Quick Build', guided:'Guided Architect', challenge:'Challeng
 function inferFromIdea(idea) {
   const t = idea.toLowerCase();
   
+  // Check if user specified a product name explicitly (e.g., "AiN: a command center..." or "Name: AiN ...")
+  const nameMatch = idea.match(/^(?:Name|Project|App)\s*:\s*([^\n]{2,60})/i) || idea.match(/^([A-Za-z0-9]+)\s*[-:–—]\s/);
+  let explicitName = nameMatch ? nameMatch[1].trim() : null;
+  
   // Detect app type
   let type = 'ops';
   if (/shop|store|market|sell|product|commerce|boutique|wine|ceramic|surф|restaurant|cafe|bakery|retail|brand|fashion|skincare|cosmetics/.test(t)) type = 'mkt';
@@ -147,11 +151,14 @@ function inferFromIdea(idea) {
   
   // Infer product name from idea
   const words = idea.split(/\s+/).filter(w => w.length > 2);
-  let productName = '';
-  if (words.length >= 2) {
-    productName = words.slice(0, 2).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-  } else if (words.length === 1) {
-    productName = words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase();
+  let productName = explicitName || '';
+  if (!productName) {
+    const words = idea.split(/\s+/).filter(w => w.length > 2);
+    if (words.length >= 2) {
+      productName = words.slice(0, 2).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    } else if (words.length === 1) {
+      productName = words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase();
+    }
   }
   
   // Infer entities based on type
@@ -358,6 +365,67 @@ gsap.to('.hero-svg', { autoAlpha: 1, rotation: 0, scrollTrigger: { trigger: '.he
   return CODE[type] || CODE.ops;
 }
 
+// === CONNECTOR RECOMMENDATION ENGINE (Base44 OAuth Connectors) ===
+function recommendConnectors(type) {
+  const CONNECTOR_REC = {
+    ops: [
+      { id: 'slack', name: 'Slack', reason: 'Push task/project status updates and alerts directly into team channels' },
+      { id: 'googlecalendar', name: 'Google Calendar', reason: 'Sync due dates and project milestones to team calendars' },
+      { id: 'github', name: 'GitHub API', reason: 'Link tasks to commits/PRs if this tool tracks engineering work' },
+      { id: 'sentry', name: 'Sentry', reason: 'Surface production errors as tasks automatically' },
+      { id: 'quickbooks', name: 'QuickBooks', reason: 'Sync expense or budget line items if the tool touches finance' },
+    ],
+    cust: [
+      { id: 'intercom', name: 'Intercom', reason: 'Sync support conversations into the portal\'s ticket view' },
+      { id: 'hubspot', name: 'HubSpot', reason: 'Sync account/contact data bidirectionally with CRM' },
+      { id: 'salesforce', name: 'Salesforce', reason: 'Enterprise CRM sync for account and opportunity data' },
+      { id: 'docusign', name: 'Docusign', reason: 'Send and track contract signatures from within the portal' },
+      { id: 'quickbooks', name: 'QuickBooks', reason: 'Sync invoices and payment status automatically' },
+    ],
+    ai: [
+      { id: 'hugging_face', name: 'Hugging Face', reason: 'Pull or reference model metadata for generation tracking' },
+      { id: 'github', name: 'GitHub API', reason: 'Version control prompt templates and generated code artifacts' },
+      { id: 'sentry', name: 'Sentry', reason: 'Track generation failures and API errors' },
+      { id: 'slack', name: 'Slack', reason: 'Alert the team on usage spikes or failed generations' },
+    ],
+    edu: [
+      { id: 'google_classroom', name: 'Google Classroom', reason: 'Sync courses and rosters for institutions already using Classroom' },
+      { id: 'googlemeet', name: 'Google Meet', reason: 'Launch live lesson sessions directly from a lesson page' },
+      { id: 'googleforms', name: 'Google Forms', reason: 'Import quiz/survey data into lesson assessments' },
+      { id: 'typeform', name: 'Typeform', reason: 'Richer quiz and feedback forms with branching logic' },
+      { id: 'googledocs', name: 'Google Docs', reason: 'Embed or sync collaborative course material drafts' },
+    ],
+    mkt: [
+      { id: 'square', name: 'Square', reason: 'Process in-person or card payments for physical goods' },
+      { id: 'wix', name: 'Wix', reason: 'Sync storefront or payment data if a Wix site exists alongside this app' },
+      { id: 'mailchimp', name: 'Mailchimp', reason: 'Send abandoned cart or promo emails to buyers' },
+      { id: 'klaviyo', name: 'Klaviyo', reason: 'Advanced ecommerce email/SMS flows keyed to purchase events' },
+      { id: 'meta_ads', name: 'Meta Ads', reason: 'Sync conversion events for ad campaign optimization' },
+      { id: 'docusign', name: 'Docusign', reason: 'Seller agreements or terms acceptance for marketplace onboarding' },
+    ],
+    com: [
+      { id: 'discord', name: 'Discord', reason: 'Mirror community posts/events into a Discord server' },
+      { id: 'eventbrite', name: 'Eventbrite', reason: 'Sync event RSVPs and ticketing for community events' },
+      { id: 'mailchimp', name: 'Mailchimp', reason: 'Send community newsletters and digest emails' },
+      { id: 'linkedin', name: 'LinkedIn', reason: 'Cross-post announcements to grow the community externally' },
+      { id: 'typeform', name: 'Typeform', reason: 'Collect structured member feedback or applications' },
+    ],
+    crt: [
+      { id: 'googledrive', name: 'Google Drive', reason: 'Store and sync high-res source files for portfolio pieces' },
+      { id: 'dropbox', name: 'Dropbox', reason: 'Alternative asset storage/sync for creators already on Dropbox' },
+      { id: 'instagram', name: 'Instagram Business', reason: 'Cross-post portfolio pieces to grow audience' },
+      { id: 'contentful', name: 'Contentful', reason: 'Headless CMS sync if content is managed outside Base44' },
+      { id: 'typeform', name: 'Typeform', reason: 'Commission request or client intake forms' },
+    ],
+  };
+  return CONNECTOR_REC[type] || CONNECTOR_REC.ops;
+}
+
+function formatConnectorRecommendations(type) {
+  const recs = recommendConnectors(type);
+  return recs.map(r => `- **${r.name}** (\`${r.id}\`) — ${r.reason}`).join('\n');
+}
+
 
 // === ELITE PROMPT COMPILER (instant, no AI need) ===
 function compileElitePrompt(type, visual, mode, idea, features) {
@@ -507,7 +575,7 @@ function compileElitePrompt(type, visual, mode, idea, features) {
     `**Type:** ${typeName}`,
     `**Visual Direction:** ${visualName}`,
     `**Build Mode:** ${modeName}`,
-    '**Name:** Derive a fitting product name from the idea.',
+    `**Name:** ${productName || 'Derive a fitting product name from the idea.'}`,
     '',
     '## 3. Product Thesis',
     idea,
@@ -677,12 +745,42 @@ function compileElitePrompt(type, visual, mode, idea, features) {
     '- Color contrast ratio ≥ 4.5:1 for normal text, ≥ 3:1 for large text',
     '- Semantic HTML: proper headings, landmarks, roles',
     '',
-    '## 15. Security',
-    '- Row-Level Security on all user-owned entities (non-admins see only their records)',
-    '- Admin role bypasses RLS',
-    '- Input validation: sanitize all text, enforce max lengths, reject HTML',
-    '- No sensitive data in URLs or client-side storage',
-    '- Rate limiting: max 100 API calls per user per 10 minutes',
+    '## 15. Security — Elite SDLC Hardening (Wiz State of SDLC Security 2026 Standards)',
+    '',
+    '**Context:** Wiz Research\'s State of SDLC Security 2026 report found that risk scales through concentration, privilege inheritance, and automation — not novel exploits. It specifically flagged Base44-generated apps where shared generation logic introduced systemic design flaws enabling unauthorized access to private applications across multiple environments. This section hardens against that exact failure class.',
+    '',
+    '### Access Control (highest-priority — this is the flaw class Wiz flagged in Base44 apps)',
+    '- Row-Level Security (RLS) enabled on EVERY user-owned entity — non-admins see ONLY records they created, verified per-entity not assumed',
+    '- Admin role bypass is EXPLICIT and audited — never an accidental fallthrough of a missing check',
+    '- Every list/detail/API read path re-validates ownership server-side — never trust a client-supplied user_id or record ID alone',
+    '- Test the negative case: a non-owner user must NOT be able to fetch, list, or mutate another user\'s records by guessing or enumerating IDs',
+    '- Public vs private page distinction must be explicit per page — no page is "accidentally public" through a missing auth guard',
+    '',
+    '### Secrets & Credentials',
+    '- Zero hardcoded API keys, tokens, or credentials in source, entity data, or client-side code — use the platform secrets manager exclusively',
+    '- No secrets in .env files committed to version control, URLs, query params, or localStorage/sessionStorage',
+    '- AI/LLM API keys (OpenAI, Anthropic, etc.) are the fastest-growing leaked-secret category per Wiz research — treat with the same rigor as cloud credentials',
+    '- Rotate any credential immediately if it appears in a prompt, log, error message, or committed file',
+    '',
+    '### Input & Injection',
+    '- Sanitize all text input server-side; enforce max lengths; reject raw HTML/script injection',
+    '- Validate and re-check every input on the backend even when client-side validation exists — client checks are UX, not security',
+    '- Parameterize all queries; never string-concatenate user input into filters or aggregations',
+    '',
+    '### Dependency & Supply Chain (concentration risk)',
+    '- Prefer well-maintained, widely-adopted packages over obscure ones — concentration of trust in popular packages means faster patching, but pin versions to avoid surprise updates',
+    '- Any third-party script/CDN dependency (animation libs, analytics, widgets) must be loaded from a pinned version URL, not a floating "latest" tag',
+    '- Audit any OAuth connector scope requested — request only the minimum read/write scope needed, never broad admin-level access by default',
+    '',
+    '### Rate Limiting & Abuse Prevention',
+    '- Rate limiting: max 100 API calls per user per 10 minutes on all mutating endpoints',
+    '- Debounce and throttle any AI-generation or expensive-compute action to prevent cost abuse',
+    '- Log and alert on anomalous access patterns (rapid sequential ID enumeration, mass export attempts)',
+    '',
+    '### Audit & Monitoring',
+    '- Every entity mutation logs created_by and updated_date automatically (Base44 default) — never disable this',
+    '- Sensitive actions (role changes, deletions, payment events) should be traceable to a specific user and timestamp',
+    '- Treat this app\'s backend functions and workflows as privileged execution paths — the same way CI/CD runners are privileged in traditional SDLC — and scope their permissions minimally',
     '',
     '## 16. Seed Data',
     '- 5 sample records for each primary entity with realistic data',
@@ -751,6 +849,18 @@ function compileElitePrompt(type, visual, mode, idea, features) {
     '- Respect prefers-reduced-motion: if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;',
     '- Cleanup: ScrollTrigger.refresh() on route change, kill all triggers on unmount',
     '- Each effect must be self-contained and not conflict with Base44 page rendering',
+    '',
+    '## 20. Connector Integration Recommendations (Base44 OAuth Connectors)',
+    `Based on the ${typeName} product type, ONE/44 recommends evaluating these Base44 connectors for integration:`,
+    '',
+    formatConnectorRecommendations(type),
+    '',
+    '**Integration guidance:**',
+    '- Treat every connector as an OAuth-scoped extension of this app\'s trust boundary — request the minimum read/write scope needed for the feature, never broad admin access by default',
+    '- Only surface a connector setup flow to admins/owners, never to regular end-users, unless the product explicitly requires user-level OAuth (e.g. "connect your own Google Calendar")',
+    '- Store no connector tokens in entity data or client code — rely on the platform\'s connector token management exclusively',
+    '- If none of the above connectors fit the actual use case, do not force one — ship without integrations rather than bolting on an irrelevant connector',
+    '- Re-evaluate this list against the full connector catalog if the product scope changes materially during build',
     '',
     '---',
     `*Generated by ONE/44 Architecture Inference Engine · Powered by FlipBot*`,
@@ -1002,6 +1112,69 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
     }
 
     // /sly build, rescue, audit, docs → create BotCommand, return "processing"
+
+    // /sly fix → show audit findings with one-click fix buttons
+    if (cn === 'sly' && sub === 'fix') {
+      const projectArg = opts.get('project');
+      try {
+        // Fetch the user's most recent project (or specified one)
+        const projectUrl = projectArg
+          ? `https://one44.base44.app/api/entities/Project?q={"id":"${projectArg}"}&limit=1`
+          : `https://one44.base44.app/api/entities/Project?limit=1&sort_by=-created_date`;
+        const pRes = await fetch(projectUrl, { headers: { 'api_key': '3ec59291a8544701abe7731069d57ef1' } });
+        const projects = await pRes.json();
+        if (!projects || !projects.length) return res.json(eph('No projects found. Run `/sly audit` first to generate findings.'));
+        const project = projects[0];
+
+        // Fetch open audit findings for this project
+        const fRes = await fetch(`https://one44.base44.app/api/entities/AuditFinding?q={"projectId":"${project.id}","status":"open"}&limit=20&sort_by=-created_date`, {
+          headers: { 'api_key': '3ec59291a8544701abe7731069d57ef1' }
+        });
+        const findings = await fRes.json();
+        if (!findings || !findings.length) return res.json(eph(`No open findings for **${project.title}**. Run \`/sly audit\` first.`));
+
+        const safeFindings = findings.filter(f => f.isSafeFix);
+        const manualFindings = findings.filter(f => !f.isSafeFix);
+        const safeCount = safeFindings.length;
+        const manualCount = manualFindings.length;
+
+        // Build findings display
+        const fields = [];
+        fields.push(f('📊 Project', `${project.title} \`(${project.status})\``, false));
+        fields.push(f('📋 Findings', `${findings.length} open (${safeCount} auto-fixable, ${manualCount} manual)`, false));
+        fields.push(sp());
+
+        for (const fnd of findings.slice(0, 10)) {
+          const sev = fnd.severity === 'critical' ? '🔴' : fnd.severity === 'warning' ? '🟡' : '🔵';
+          const fixable = fnd.isSafeFix ? '✅' : '👁️';
+          fields.push({ name: `${sev} ${fnd.title}`, value: `**Category:** ${fnd.category}\n**Fix:** ${fnd.isSafeFix ? fnd.recommendation?.substring(0, 150) + '...' : 'Manual review required'}\n**ID:** \`${fnd.id}\``, inline: false });
+        }
+
+        // Build buttons
+        const buttons = [];
+        // Fix All Safe button
+        if (safeCount > 0) {
+          buttons.push({ type: 2, custom_id: `fix_all_${project.id}`, label: `✅ Fix All Safe (${safeCount})`, style: 3 });
+        }
+        // Individual fix buttons for safe findings (max 4 more, Discord limit is 5 per row)
+        for (const fnd of safeFindings.slice(0, 4)) {
+          buttons.push({ type: 2, custom_id: `fix_one_${fnd.id}`, label: `🔧 ${fnd.title.substring(0, 20)}`, style: 1 });
+        }
+        
+        const components = buttons.length > 0 ? [{ type: 1, components: buttons }] : [];
+
+        return res.json(E({
+          title: `🛠️ Audit Findings — ${project.title}`,
+          desc: `**Readiness:** ${project.readinessStatus || 'Not scored'} (${project.readinessScore || 'N/A'})\n**Critical Findings:** ${project.criticalFindingCount || 0}`,
+          color: C.warn,
+          fields,
+          components: components.length > 0 ? components : undefined
+        }));
+      } catch (err) {
+        return res.json(eph('Error fetching findings: ' + err.message));
+      }
+    }
+
     if (cn === 'sly' && ['build', 'rescue', 'audit', 'docs'].includes(sub)) {
       const rt = san(opts.get('goal') || opts.get('problem') || opts.get('url') || opts.get('query') || '', 4000);
       if (!rt) return res.json(eph(`Provide input for \`/sly ${sub}\`.`));
@@ -1131,7 +1304,7 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
             rawIdea: idea,
             buildMode: inference.mode || 'challenge',
             visualDirection: inference.visualName || 'Precision Editorial',
-            title: idea.substring(0, 60),
+            title: inference.productName ? inference.productName : idea.substring(0, 60),
             brief: { thesis: idea, recommendedMode: inference.mode || 'challenge' },
           })
         });
@@ -1193,6 +1366,85 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
         textRow('mode', 'Build mode (optional)', 1, false, 'quick, guided, challenge'),
         textRow('features', 'Specific features or constraints? (optional)', 2, false, 'Must-haves, exclusions'),
       ]));
+    }
+
+
+    // Fix All Safe findings
+    if (cid.startsWith('fix_all_')) {
+      const projectId = cid.replace('fix_all_', '');
+      res.json({ type: 5, data: { flags: 64 } }); // deferred
+      
+      try {
+        const fixRes = await fetch(`${ONE44_URL}/applySafeFix`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'api_key': '3ec59291a8544701abe7731069d57ef1' },
+          body: JSON.stringify({ projectId, fixAll: true })
+        });
+        const result = await fixRes.json();
+        
+        const fields = [];
+        if (result.fixed && Array.isArray(result.fixed)) {
+          for (const fix of result.fixed) {
+            fields.push(f(`✅ ${fix.title}`, fix.fixKey || 'Resolved', false));
+          }
+        }
+        if (result.newScore !== undefined) {
+          fields.push(sp());
+          fields.push(f('📊 New Score', `${result.newScore} (${result.newStatus || 'updated'})`, false));
+        }
+        
+        await fetch(`https://discord.com/api/v10/webhooks/${APP_ID}/${i.token}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            embeds: [embed('✅ Safe Fixes Applied', `${result.fixed?.length || 0} findings resolved automatically.`, C.success, fields)],
+            flags: 64
+          })
+        });
+      } catch (err) {
+        await fetch(`https://discord.com/api/v10/webhooks/${APP_ID}/${i.token}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: '❌ Fix failed: ' + err.message, flags: 64 })
+        });
+      }
+      return;
+    }
+    
+    // Fix individual finding
+    if (cid.startsWith('fix_one_')) {
+      const findingId = cid.replace('fix_one_', '');
+      res.json({ type: 5, data: { flags: 64 } }); // deferred
+      
+      try {
+        const fixRes = await fetch(`${ONE44_URL}/applySafeFix`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'api_key': '3ec59291a8544701abe7731069d57ef1' },
+          body: JSON.stringify({ findingId })
+        });
+        const result = await fixRes.json();
+        
+        const fields = [];
+        if (result.fixApplied) fields.push(f('🔧 Fix Applied', result.fixApplied, false));
+        if (result.recommendation) fields.push(f('📝 Detail', result.recommendation.substring(0, 200), false));
+        if (result.newScore !== undefined) fields.push(f('📊 New Score', `${result.newScore} (${result.newStatus || 'updated'})`, false));
+        
+        await fetch(`https://discord.com/api/v10/webhooks/${APP_ID}/${i.token}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            embeds: [embed('✅ Finding Fixed', result.success ? 'Auto-fix applied successfully.' : 'Fix could not be applied.', result.success ? C.success : C.error, fields)],
+            flags: 64
+          })
+        });
+      } catch (err) {
+        await fetch(`https://discord.com/api/v10/webhooks/${APP_ID}/${i.token}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: '❌ Fix failed: ' + err.message, flags: 64 })
+        });
+      }
+      return;
     }
 
     return res.json(eph('Button received.'));
@@ -1295,7 +1547,7 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
             rawIdea: idea || 'Build a product',
             buildMode: mode,
             visualDirection: VN[visual] || visual,
-            title: (idea || 'Build a product').substring(0, 60),
+            title: inference.productName ? inference.productName : (idea || 'Build a product').substring(0, 60),
             brief: { thesis: idea || 'Build a product', recommendedMode: mode },
           })
         });
@@ -1473,6 +1725,7 @@ async function registerCommands() {
         { name: 'build', description: '🏗️ AI build analysis', type: 1, options: [{ name: 'goal', description: 'What to build', type: 3, required: true }] },
         { name: 'rescue', description: '🔧 Debug broken builds', type: 1, options: [{ name: 'problem', description: 'What is broken', type: 3, required: true }] },
         { name: 'audit', description: '🔍 Review an app URL', type: 1, options: [{ name: 'url', description: 'App URL to audit', type: 3, required: true }] },
+        { name: 'fix', description: '🛠️ Fix audit findings (one-click)', type: 1, options: [{ name: 'project', description: 'Project ID (optional — uses latest if omitted)', type: 3 }] },
         { name: 'docs', description: '📚 Search Base44 docs', type: 1, options: [{ name: 'query', description: 'Search query', type: 3, required: true }] },
         { name: 'ship', description: '🚢 Showcase your project', type: 1 },
         { name: 'request', description: '🧩 Browse add-on modules', type: 1 },
