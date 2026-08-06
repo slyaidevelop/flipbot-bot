@@ -1125,50 +1125,89 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
         const projects = await pRes.json();
         if (!projects || !projects.length) return res.json(eph('No projects found. Run `/sly audit` first to generate findings.'));
         const project = projects[0];
+        const auditDate = project.updated_date ? new Date(project.updated_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Unknown';
 
-        // Fetch open audit findings for this project
-        const fRes = await fetch(`https://one44.base44.app/api/entities/AuditFinding?q={"projectId":"${project.id}","status":"open"}&limit=20&sort_by=-created_date`, {
+        // Fetch ALL findings for this project (open + resolved) to show full scan context
+        const fRes = await fetch(`https://one44.base44.app/api/entities/AuditFinding?q={"projectId":"${project.id}"}&limit=50&sort_by=-created_date`, {
           headers: { 'api_key': '3ec59291a8544701abe7731069d57ef1' }
         });
-        const findings = await fRes.json();
-        if (!findings || !findings.length) return res.json(eph(`No open findings for **${project.title}**. Run \`/sly audit\` first.`));
+        const allFindings = await fRes.json();
+        const findings = (allFindings || []).filter(f => f.status === 'open');
+        const resolvedCount = (allFindings || []).filter(f => f.status === 'resolved').length;
+        
+        if (!findings.length) {
+          // All findings resolved or no findings
+          if (allFindings && allFindings.length) {
+            return res.json(eph(`🎉 All ${allFindings.length} findings for **${project.title}** are resolved! Readiness: ${project.readinessScore || 'N/A'}`));
+          }
+          return res.json(eph(`No audit findings for **${project.title}**. Run \`/sly audit\` first.`));
+        }
 
         const safeFindings = findings.filter(f => f.isSafeFix);
         const manualFindings = findings.filter(f => !f.isSafeFix);
         const safeCount = safeFindings.length;
         const manualCount = manualFindings.length;
+        const criticalCount = findings.filter(f => f.severity === 'critical').length;
 
-        // Build findings display
+        // Build findings display — organized by fixability
         const fields = [];
-        fields.push(f('📊 Project', `${project.title} \`(${project.status})\``, false));
-        fields.push(f('📋 Findings', `${findings.length} open (${safeCount} auto-fixable, ${manualCount} manual)`, false));
+        
+        // Project context header
+        fields.push({ name: '📊 Project', value: `**${project.title}** \`(${project.status || 'draft'})\``, inline: true });
+        fields.push({ name: '🔍 Last Audit', value: auditDate, inline: true });
+        fields.push({ name: '📈 Score', value: `${project.readinessScore || 'N/A'} (${project.readinessStatus || 'Not scored'})`, inline: true });
         fields.push(sp());
 
-        for (const fnd of findings.slice(0, 10)) {
-          const sev = fnd.severity === 'critical' ? '🔴' : fnd.severity === 'warning' ? '🟡' : '🔵';
-          const fixable = fnd.isSafeFix ? '✅' : '👁️';
-          fields.push({ name: `${sev} ${fnd.title}`, value: `**Category:** ${fnd.category}\n**Fix:** ${fnd.isSafeFix ? fnd.recommendation?.substring(0, 150) + '...' : 'Manual review required'}\n**ID:** \`${fnd.id}\``, inline: false });
+        // Summary line
+        fields.push({ name: '📋 Summary', value: `${findings.length} open findings — ${safeCount} ✅ auto-fixable, ${manualCount} 👁️ manual review, ${resolvedCount} ✅ resolved\n**Critical:** ${criticalCount} · **Warnings:** ${findings.filter(f => f.severity === 'warning').length} · **Optimizations:** ${findings.filter(f => f.severity === 'optimization').length}`, inline: false });
+        fields.push(sp());
+
+        // Safe fixes section (show first, these are actionable)
+        if (safeCount > 0) {
+          fields.push({ name: '✅ ONE-CLICK FIXES', value: 'Click a button below to auto-resolve these findings.', inline: false });
+          for (const fnd of safeFindings.slice(0, 5)) {
+            const sev = fnd.severity === 'critical' ? '🔴' : fnd.severity === 'warning' ? '🟡' : '🔵';
+            fields.push({ name: `${sev} ${fnd.title}`, value: `**Category:** ${fnd.category}\n**Fix Key:** \`${fnd.fixKey}\`\n**Recommendation:** ${(fnd.recommendation || '').substring(0, 120)}${fnd.recommendation?.length > 120 ? '...' : ''}`, inline: false });
+          }
         }
 
-        // Build buttons
+        // Manual review section
+        if (manualCount > 0) {
+          fields.push({ name: '👁️ MANUAL REVIEW REQUIRED', value: 'These findings need your judgment — cannot be auto-fixed.', inline: false });
+          for (const fnd of manualFindings.slice(0, 3)) {
+            const sev = fnd.severity === 'critical' ? '🔴' : fnd.severity === 'warning' ? '🟡' : '🔵';
+            fields.push({ name: `${sev} ${fnd.title}`, value: `**Category:** ${fnd.category}\n**Recommendation:** ${(fnd.recommendation || '').substring(0, 150)}${fnd.recommendation?.length > 150 ? '...' : ''}`, inline: false });
+          }
+          if (manualCount > 3) {
+            fields.push({ name: '+ More', value: `${manualCount - 3} additional manual review findings not shown. Use the ONE/44 web app to view all.`, inline: false });
+          }
+        }
+
+        // Build buttons — Fix All + individual fix buttons
         const buttons = [];
-        // Fix All Safe button
         if (safeCount > 0) {
           buttons.push({ type: 2, custom_id: `fix_all_${project.id}`, label: `✅ Fix All Safe (${safeCount})`, style: 3 });
         }
-        // Individual fix buttons for safe findings (max 4 more, Discord limit is 5 per row)
         for (const fnd of safeFindings.slice(0, 4)) {
           buttons.push({ type: 2, custom_id: `fix_one_${fnd.id}`, label: `🔧 ${fnd.title.substring(0, 20)}`, style: 1 });
         }
+        // Add dismiss button for manual findings
+        if (manualCount > 0) {
+          buttons.push({ type: 2, custom_id: `fix_dismiss_${project.id}`, label: `👁️ Dismiss Manual`, style: 2 });
+        }
         
-        const components = buttons.length > 0 ? [{ type: 1, components: buttons }] : [];
+        // Split buttons into rows of 5 (Discord limit)
+        const rows = [];
+        for (let i = 0; i < buttons.length; i += 5) {
+          rows.push({ type: 1, components: buttons.slice(i, i + 5) });
+        }
 
         return res.json(E({
           title: `🛠️ Audit Findings — ${project.title}`,
-          desc: `**Readiness:** ${project.readinessStatus || 'Not scored'} (${project.readinessScore || 'N/A'})\n**Critical Findings:** ${project.criticalFindingCount || 0}`,
-          color: C.warn,
+          desc: `**Project:** ${project.title}\n**Audit Date:** ${auditDate}\n**Readiness:** ${project.readinessScore || 'N/A'} (${project.readinessStatus || 'Not scored'})`,
+          color: criticalCount > 0 ? C.error : safeCount > 0 ? C.warn : C.info,
           fields,
-          components: components.length > 0 ? components : undefined
+          components: rows.length > 0 ? rows : undefined
         }));
       } catch (err) {
         return res.json(eph('Error fetching findings: ' + err.message));
@@ -1406,6 +1445,40 @@ app.post('/interactions', express.raw({ type: 'application/json' }), async (req,
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ content: '❌ Fix failed: ' + err.message, flags: 64 })
+        });
+      }
+      return;
+    }
+    
+    // Dismiss manual findings
+    if (cid.startsWith('fix_dismiss_')) {
+      const projectId = cid.replace('fix_dismiss_', '');
+      res.json({ type: 5, data: { flags: 64 } });
+      try {
+        // Mark all open non-safe findings as dismissed for this project
+        const fRes = await fetch(`https://one44.base44.app/api/entities/AuditFinding?q={"projectId":"${projectId}","status":"open","isSafeFix":false}&limit=20`, {
+          headers: { 'api_key': '3ec59291a8544701abe7731069d57ef1' }
+        });
+        const findings = await fRes.json();
+        let dismissed = 0;
+        for (const fnd of (findings || [])) {
+          await fetch(`https://one44.base44.app/api/entities/AuditFinding/${fnd.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'api_key': '3ec59291a8544701abe7731069d57ef1' },
+            body: JSON.stringify({ status: 'dismissed' })
+          });
+          dismissed++;
+        }
+        await fetch(`https://discord.com/api/v10/webhooks/${APP_ID}/${i.token}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: `👁️ Dismissed ${dismissed} manual review findings.`, flags: 64 })
+        });
+      } catch (err) {
+        await fetch(`https://discord.com/api/v10/webhooks/${APP_ID}/${i.token}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: '❌ Dismiss failed: ' + err.message, flags: 64 })
         });
       }
       return;
